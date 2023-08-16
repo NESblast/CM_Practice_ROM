@@ -67,7 +67,7 @@ CheckSelect:
     LDA $07F8
     EOR #$08
     BEQ -
-    JMP $1fff
+    JMP $1fff   ; Jump To SelectWarp
 
 .ORG $1F20
 
@@ -135,20 +135,6 @@ DrawHUDValues:
     STX PpuData_2007
     LDY #$24
     JMP PPUReturn
-
-.ORG $1FBB
-SelectWarp:
-    LDY #$00
-    LDA SpawnTypeUsed
-    BNE InputPPUWrite
-    LDA WarpWorldLast
-    BEQ InputPPUWrite
-    STA WorldNumber
-    INC IsInMap
-    LDA WarpIDLast
-    STA $02
-    JMP MapWarp
-    RTS
 
 
 .BANK $1E SLOT "$8000"
