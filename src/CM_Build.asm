@@ -14,7 +14,7 @@ BANKSTOTAL   48
 BANKSIZE   $2000
 BANKS      48
 .ENDRO
-
+.16BIT
 .BACKGROUND "CM_1_0_noheader.nes"
 
 .INCLUDE "NES_labels.asm"
