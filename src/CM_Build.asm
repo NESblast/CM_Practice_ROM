@@ -149,3 +149,71 @@ SelectWarp:
     STA $02
     JMP MapWarp
     RTS
+
+
+.BANK $1E SLOT "$8000"
+
+.ORG $155A
+.db "World"
+.db "Dashes"
+.db "Collect"
+.db "Display"
+.db "Select"
+.db "Death Warp"
+.db "Respawn"
+.db "Powerups"
+
+.ORG $15C0
+MenuRoutine:
+  LDA Input
+  AND #$08
+  BEQ CheckLeft
+  AND DelayedInput
+  BNE CheckLeft
+
+; play stomp SFX
+  LDX Sfx_StompSQ
+  STX Square1SoundQueue
+
+  DEC MenuSelector
+  BPL Label
+  LDA #$07
+  STA MenuSelector
+  JMP Label
+CheckLeft:
+  LDA Input
+  AND #$04
+  BEQ Label
+  AND DelayedInput
+  BNE Label
+
+; play stomp SFX
+  LDX Sfx_StompSQ
+  STX Square1SoundQueue
+
+  LDX MenuSelector
+  INX
+  CPX #$08
+  BNE +
+  LDX #$00
++:
+  STX MenuSelector
+Label:
+  LDA MenuSelector
+  TAY
+  ASL A
+  ASL A
+  ASL A
+  ADC #$7B
+  CPY #$07
+  BNE FirstColumn
+  SBC #$38
+  STA $0230
+  LDA #$B0
+  STA $0233
+  RTS
+FirstColumn:
+  STA $0230
+  LDA #$58
+  STA $0233
+  RTS
