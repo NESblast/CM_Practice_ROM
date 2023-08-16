@@ -1,4 +1,4 @@
-wla-6502 -v -o %1.obj %1.asm
+wla-6502 -v -o %1.obj .\src\%1.asm
 IF %errorlevel% GTR 0 GOTO :pause
 
 wlalink -v -s linkfile %1.nes
