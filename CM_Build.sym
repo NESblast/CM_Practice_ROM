@@ -1,0 +1,7 @@
+; this file was created with wlalink by ville helin <ville.helin@iki.fi>.
+; no$gmb symbolic information for "CM_Build.nes".
+00:0010 aRamValueNES
+00:6010 aRamValueCart
+02:bf00 aLabel
+04:bf00 aLabel2
+06:ff06 aLabel3456
