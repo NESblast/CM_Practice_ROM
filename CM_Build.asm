@@ -1,8 +1,8 @@
 .MEMORYMAP 
 SLOTSIZE   $2000
 DEFAULTSLOT   0
-SLOT 0      $8000
-SLOT 1      $A000
+SLOT 0      $8000   "$8000"
+SLOT 1      $A000   "$A000"
 SLOT 2      $C000
 SLOT 3      $E000
 SLOT 4 			$0000		"RAM_NES"
@@ -58,4 +58,7 @@ aLabel3456:
 .DB "Hello, is it me you're looking for"
 
 
-
+; Title Screen Version
+.BANK $1D SLOT "$A000"
+.ORG $020B
+.db "PRACTICE ROM V1.03         "
