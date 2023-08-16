@@ -19,6 +19,7 @@ BANKS      48
 
 .INCLUDE "NES_labels.asm"
 .INCLUDE "src\ram_labels.asm"
+.INCLUDE "src\constants.asm"
 
 ; Cartridge Ram Vars
 .BANK 0 SLOT "RAM_CART"
