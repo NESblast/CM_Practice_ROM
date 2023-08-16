@@ -9,11 +9,13 @@
 
 .ORG $050	XSpeed:	                ;The horizontal speed that Mario is trying to go. This does not account for any external speed changes (moving platforms, slopes, etc.)
 .ORG $08F	YSpeed:	                ;The vertical speed that Mario is trying to go, positive down.
-.ORG $3C0	XSubspeed:	            ;Essentially Mario’s acceleration value. When it is high, he will accelerate quicker, and when it is low, he will decelerate quicker.
-.ORG $3EB	YSubspeed:	            ;Mario’s vertical acceleration.
 .ORG $065	XPage:	                ;The horizontal screen page that Mario is currently on.
 .ORG $07A	XPixel:	                ;The horizontal pixel that Mario is at.
 .ORG $0B9	YPixel:	                ;The vertical pixel that Mario is at. Higher value = lower on the screen.
+
+.16BIT
+.ORG $3C0	XSubspeed:	            ;Essentially Mario’s acceleration value. When it is high, he will accelerate quicker, and when it is low, he will decelerate quicker.
+.ORG $3EB	YSubspeed:	            ;Mario’s vertical acceleration.
 .ORG $3C1	XSubpixel:	            ;The horizontal subpixel that Mario is at. Though there is no visible difference, a higher value means further to the right.
 .ORG $3D6	YSubpixel:              ;Mario’s vertical subpixel
 
@@ -45,6 +47,4 @@
 .ORG $7FC   WarpWorldLast:
 .ORG $7FD   WarpIDLast:
 
-.16BIT
-.ORG $07F9  MenuSelector:
-.ORG $7804  Square1SoundQueue:
+.ORG $7804 Square1SoundQueue
