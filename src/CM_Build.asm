@@ -217,3 +217,114 @@ FirstColumn:
   LDA #$58
   STA $0233
   RTS
+
+.ORG $1640
+UpdateMenuTexts:
+  LDA IsOnMapMenu
+  BNE +
+  RTS
+
++
+  LDA #$60
+  STA $0A
+  LDA #$95
+  STA $0B
+
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$46
+  STA PpuAddr_2006
+
+  LDX #$05
+-
+  LDA ($0A),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$65
+  STA PpuAddr_2006
+  LDX #$06
+-
+  LDA ($0A),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$84
+  STA PpuAddr_2006
+  LDX #$07
+-
+  LDA ($0A),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$A4
+  STA PpuAddr_2006
+  LDX #$07
+-
+  LDA ($0A),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$C5
+  STA PpuAddr_2006
+  LDX #$06
+-
+  LDA ($0A),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$E1
+  STA PpuAddr_2006
+  LDX #$0A
+-
+  LDA ($0A),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+
+  LDA #$23
+  STA PpuAddr_2006
+  LDA #$04
+  STA PpuAddr_2006
+  LDX #$07
+-
+  LDA ($0A),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$57
+  STA PpuAddr_2006
+  LDX #$08
+-
+  LDA ($0A),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+  RTS
+

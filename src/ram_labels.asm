@@ -45,4 +45,6 @@
 .ORG $7FC   WarpWorldLast:
 .ORG $7FD   WarpIDLast:
 
-.ORG $7804 Square1SoundQueue
+.16BIT
+.ORG $07F9  MenuSelector:
+.ORG $7804  Square1SoundQueue:
