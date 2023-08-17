@@ -8,14 +8,15 @@
 
 # Specify the file path here
 $file_path = $args[0]
-$output_path = "$file_path"+"_ROM.mlb"
-$sym_path = "$file_path.sym"
+$file_name = $args[1]
+$output_path = $file_path+$file_name+"_ROM.mlb"
+$sym_path = $file_path+$file_name+".sym"
 
 # Open the input file and read its contents
 $content = Get-Content $sym_path
 
 # Open the output file for writing
-$output_file = [System.IO.File]::CreateText($output_path)
+# $output_file = [System.IO.File]::CreateText($output_path)
 
 # Loop through each line in the file and update the value
 foreach ($line in $content) {
@@ -34,8 +35,6 @@ foreach ($line in $content) {
 
         # Define the correct .MLB prefix
         $mesenLabel = "NesPrgRom:"
-        if($original_value -lt 8192) { $mesenLabel = "NesMemory:" }
-        elseif($original_value -lt 32768) { $mesenLabel = "NesSaveRam:" }
 
         # Convert the line format to .MLB format
         $new_line = $line -replace $hex_value, $new_hex_value
@@ -43,8 +42,8 @@ foreach ($line in $content) {
         $new_line = $new_line -replace " ", ":"
 
         # Output the decimal value to the console
-        $output_file.WriteLine($new_line)
+        Add-Content -Path $output_path $new_line
     }
 }
 
-$output_file.Close()
+# $output_file.Close()

@@ -6,8 +6,10 @@ IF %errorlevel% GTR 0 GOTO :pause
 
 copy /b header.bin+%1.nes %1_ROM.nes
 
-REM NES_sym_to_mlb.ps1 %CD%\%1
-powershell.exe -ExecutionPolicy Bypass -file %CD%\NES_sym_to_mlb.ps1 %CD%\%1
+powershell.exe -ExecutionPolicy Bypass -file %CD%\NES_ram_to_mlb.ps1 %CD%\ %1
+IF %errorlevel% GTR 0 GOTO :pause
+
+powershell.exe -ExecutionPolicy Bypass -file %CD%\NES_sym_to_mlb.ps1 %CD%\ %1
 IF %errorlevel% GTR 0 GOTO :pause
 
 REM Put a Shortcut for Mesen in this folder named Mesen2.lnk
