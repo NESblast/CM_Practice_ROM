@@ -1,8 +1,22 @@
 ; NES Ram Vars
 .BANK 0 SLOT "RAM_NES"
 
+Temp_Var1 = $00
+Temp_Var2 = $01
+Temp_Var3 = $02
+Temp_Var4 = $03
+Temp_Var5 = $04
+Temp_Var6 = $05
+Temp_Var7 = $06
+Temp_Var8 = $07
+
+TempAddr = $00
+
 PlayerState = $00E		          ;If this value is equal to 8, the player can control Mario.
 AirborneState	 = $020	        ;0 = standing on ground, 1 = jumping, 2 = falling
+
+MapCursorX = $46
+MapCursorY = $47
 
 Input = $E2    
 DelayedInput = $E3    
@@ -30,6 +44,7 @@ WorldNumber = $57F
 GroundedStatus = $70C		        ;A moon will not be counted until Mario is on solid ground. If this is equal to 1, Mario can collect a moon.
 DreamBlockStatus = $70F		      ;7D = inside dream block, 7E = exiting dream block
 
+PPUMaskVar = $743
 RoomID = $74D   
 RoomIDTemp = $74E   
 SpawnTypeUsed = $751   
@@ -46,12 +61,14 @@ WallKickTimer = $79D		        ;After a wall kick, Mario will be forced away from
 PracticeFlags = $7F8
 MenuSelector = $7F9
 IsOnMapMenu = $7FA
+TempWorldNumber = $7FB
 WarpWorldLast = $7FC
 WarpIDLast = $7FD
 
 ; Cartridge Ram Vars
 .BANK 5 SLOT "RAM_CART"
 
+MenuIsToggling = $1380
 Square1SoundQueue = $1804
 MaxDashesCount = $1F03
 

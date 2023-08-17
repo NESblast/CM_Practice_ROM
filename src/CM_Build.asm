@@ -137,9 +137,10 @@ DrawHUDValues:
 
 ; hijack and transfer the player to the menu routine
 .ORG $0B3C
-  BEQ $8B49
+  BEQ BEQMapRoutine
 
 .ORG $0B49
+BEQMapRoutine:
   JMP MapRoutine
 
 .ORG $1120
@@ -164,19 +165,59 @@ MapRoutine:
 JumpBackFromMapRoutine:
   JMP $8B4E
 
-  
+MapMenuToggle:
+  LDA Input
+  AND Select_Button
+  BEQ +
+  AND DelayedInput
+  BNE +
+  LDA IsOnMapMenu
+  EOR #%00000001
+  STA IsOnMapMenu
+  JSR MenuIsToggling
++
+  RTS
 
-  
-.ORG $155A
-.db "World"
-.db "Dashes"
-.db "Collect"
-.db "Display"
-.db "Select"
-.db "Death Warp"
-.db "Respawn"
-.db "Powerups"
+GoThroughSettings:
+  LDA MenuSelector
+  ASL A ; times two
+  TAY
 
+  LDA MenuSettingsAddr,Y
+  STA TempAddr
+  INY
+  LDA MenuSettingsAddr,Y
+  STA TempAddr+1
+
+  JMP (TempAddr)
+
+MenuSettingsAddr:
+	;.word CheckToChangeMapWorld
+
+UpdateXYMapTiles:
+  LDA #$B0
+  STA PpuControl_2000
+  LDA #$20
+  STA PpuAddr_2006
+  LDA #$D7
+  STA PpuAddr_2006
+  LDA TempWorldNumber
+  ADC #$01
+  STA PpuData_2007
+  LDA #$20
+  STA PpuAddr_2006
+  LDA #$DA
+  STA PpuAddr_2006
+  LDA MapCursorX
+  STA PpuData_2007
+  LDA #$20
+  STA PpuAddr_2006
+  LDA #$DD
+  STA PpuAddr_2006
+  LDA MapCursorY
+  ADC #$02
+  STA PpuData_2007
+  JMP $8B51
 
 .ORG $15C0
 MenuRoutine:
@@ -239,10 +280,10 @@ UpdateMenuTexts:
   RTS
 
 +
-  LDA #$60
-  STA $0A
-  LDA #$95
-  STA $0B
+  LDA lobyte(MenuTexts)
+  STA TempAddr
+  LDA hibyte(MenuTexts)
+  STA TempAddr+1
 
   LDA #$22
   STA PpuAddr_2006
@@ -251,7 +292,7 @@ UpdateMenuTexts:
 
   LDX #$05
 -
-  LDA ($0A),Y
+  LDA (TempAddr),Y
   STA PpuData_2007
   INY
   DEX
@@ -263,7 +304,7 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$06
 -
-  LDA ($0A),Y
+  LDA (TempAddr),Y
   STA PpuData_2007
   INY
   DEX
@@ -275,7 +316,7 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$07
 -
-  LDA ($0A),Y
+  LDA (TempAddr),Y
   STA PpuData_2007
   INY
   DEX
@@ -287,7 +328,7 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$07
 -
-  LDA ($0A),Y
+  LDA (TempAddr),Y
   STA PpuData_2007
   INY
   DEX
@@ -299,7 +340,7 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$06
 -
-  LDA ($0A),Y
+  LDA (TempAddr),Y
   STA PpuData_2007
   INY
   DEX
@@ -311,7 +352,7 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$0A
 -
-  LDA ($0A),Y
+  LDA (TempAddr),Y
   STA PpuData_2007
   INY
   DEX
@@ -323,7 +364,7 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$07
 -
-  LDA ($0A),Y
+  LDA (TempAddr),Y
   STA PpuData_2007
   INY
   DEX
@@ -335,12 +376,22 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$08
 -
-  LDA ($0A),Y
+  LDA (TempAddr),Y
   STA PpuData_2007
   INY
   DEX
   BNE -
   RTS
+
+MenuTexts:
+.db "World"
+.db "Dashes"
+.db "Collect"
+.db "Display"
+.db "Select"
+.db "Death Warp"
+.db "Respawn"
+.db "Powerups"
 
 .ORG $1760
 CheckToChangeMaxDashes:
