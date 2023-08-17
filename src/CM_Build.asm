@@ -20,6 +20,7 @@ BANKS      48
 .INCLUDE "NES_labels.asm"
 .INCLUDE "src\CM_Build_Constants.asm"
 .INCLUDE "src\CM_Build_RAM.asm"
+.INCLUDE "src\CM_Graphics.asm"
 
 
 .BANK $0C SLOT "$A000"
@@ -520,4 +521,5 @@ UpdateMenuCollect:
 SkipUpdateMenuCollect:
   LDX #$00
   RTS
+	
 
