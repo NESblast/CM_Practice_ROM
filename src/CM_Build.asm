@@ -144,9 +144,28 @@ DrawHUDValues:
 BEQMapRoutine:
   JMP MapRoutine
 
-; menu IRQ fix
-.ORG $0E7F
-  LDA #$C0
+.ORG $0E90
+  LDA $0590 ; scanline counter
+  CMP #$03
+  BEQ +
+
+  ; waste cycles for raster
+  PHP
+  PLP
+  NOP
+
+  LDY #$30
+  STY $5128
+  INY
+  STY $5129
+  LDA #$D8
+  STA $5203 ; scanline for next IRQ
+  INC $0590
+  RTS
++
+  LDY #$00
+  STY PPU_MASK
+  RTS
 
 .ORG $1120
 MapRoutine:
@@ -339,10 +358,10 @@ UpdateMenuTexts:
   ;RTS
 
 ;+
-  LDA lobyte(MenuTexts)
-  STA TempAddr+1
-  LDA hibyte(MenuTexts)
+  LDA #lobyte(MenuTexts)
   STA TempAddr
+  LDA #hibyte(MenuTexts)
+  STA TempAddr+1
 
   LDA #$22
   STA PpuAddr_2006
