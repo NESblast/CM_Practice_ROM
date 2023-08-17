@@ -14,17 +14,13 @@ BANKSTOTAL   48
 BANKSIZE   $2000
 BANKS      48
 .ENDRO
-
+.16BIT
 .BACKGROUND "CM_1_0_noheader.nes"
 
 .INCLUDE "NES_labels.asm"
-.INCLUDE "src\ram_labels.asm"
-.INCLUDE "src\constants.asm"
+.INCLUDE "src\CM_Build_Constants.asm"
+.INCLUDE "src\CM_Build_RAM.asm"
 
-; Cartridge Ram Vars
-.BANK 0 SLOT "RAM_CART"
-
-.ORG $10 aRamValueCart:
 
 .BANK $0C SLOT "$A000"
 .ORG $0000
