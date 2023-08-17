@@ -143,10 +143,14 @@ DrawHUDValues:
 BEQMapRoutine:
   JMP MapRoutine
 
+; menu IRQ fix
+.ORG $0E7F
+  LDA #$C0
+
 .ORG $1120
 MapRoutine:
-  LDA #%00011000
-  STA PPUMaskVar
+  ; LDA #%00011000
+  ; STA PPUMaskVar
 
   LDA IsInMap
   AND #%10000000
@@ -167,7 +171,7 @@ JumpBackFromMapRoutine:
 
 MapMenuToggle:
   LDA Input
-  AND Select_Button
+  AND #Select_Button
   BEQ +
   AND DelayedInput
   BNE +
@@ -177,6 +181,16 @@ MapMenuToggle:
   JSR MenuIsToggling
 +
   RTS
+
+MenuIsToggling:
+  LDA #Sfx_EnemySmack
+  STA Square1SoundQueue
+  LDA IsOnMapMenu
+  ;BEQ +
+  JSR UpdateMenuTexts
+;+
+  ;JMP DrawAllMenuValues
+
 
 GoThroughSettings:
   LDA MenuSelector
@@ -192,7 +206,51 @@ GoThroughSettings:
   JMP (TempAddr)
 
 MenuSettingsAddr:
-	;.word CheckToChangeMapWorld
+	.word CheckToChangeMapWorld
+
+CheckToChangeMapWorld:
+  LDX TempWorldNumber
+  LDA Input
+  AND #Right_Dir
+  BEQ +
+  AND DelayedInput
+  BNE +
+  INX
+  CPX #$04
+  BNE ++
+  LDX #$01
+  JMP ++
++
+  LDA Input
+  AND #Left_Dir
+  BEQ +++
+  AND DelayedInput
+  BNE +++
+  DEX
+  CPX #$00
+  BNE ++
+  LDX #$03
+++
+  STX TempWorldNumber
+  CLC
+  ;JSR DrawWorldValue
+  LDA #$00
+  ;INC DrawMapRowCounter
+  STA PPU_MASK
+  LDA #$30
+  STA PpuAddr_2006
+  LDA #$00
+  STA PpuAddr_2006
+  TXA
+  ;JSR ChangeMapTiles
+  LDA #$81
+  STA IsInMap
+  ;LDA #$0A
+  ;STA DrawMapFlags
+  ;JSR PlaySwooshSFX
++++
+  RTS
+
 
 UpdateXYMapTiles:
   LDA #$B0
@@ -222,29 +280,29 @@ UpdateXYMapTiles:
 .ORG $15C0
 MenuRoutine:
   LDA Input
-  AND Up_Dir
-  BEQ CheckDown
+  AND #Up_Dir
+  BEQ +++
   AND DelayedInput
-  BNE CheckDown
+  BNE +++
 
 ; play stomp SFX
-  LDX Sfx_StompSQ
+  LDX #Sfx_StompSQ
   STX Square1SoundQueue
 
   DEC MenuSelector
-  BPL Label
+  BPL ++
   LDA #$07
   STA MenuSelector
-  JMP Label
-CheckDown:
+  JMP ++
++++:
   LDA Input
-  AND Down_Dir
-  BEQ Label
+  AND #Down_Dir
+  BEQ ++
   AND DelayedInput
-  BNE Label
+  BNE ++
 
 ; play stomp SFX
-  LDX Sfx_StompSQ
+  LDX #Sfx_StompSQ
   STX Square1SoundQueue
 
   LDX MenuSelector
@@ -252,9 +310,9 @@ CheckDown:
   CPX #$08
   BNE +
   LDX #$00
-+:
+  +
   STX MenuSelector
-Label:
+  ++
   LDA MenuSelector
   TAY
   ASL A
@@ -262,28 +320,28 @@ Label:
   ASL A
   ADC #$7B
   CPY #$07
-  BNE FirstColumn
+  BNE +
   SBC #$38
   STA $0230
   LDA #$B0
   STA $0233
   RTS
-FirstColumn:
+  +
   STA $0230
   LDA #$58
   STA $0233
   RTS
 
 UpdateMenuTexts:
-  LDA IsOnMapMenu
-  BNE +
-  RTS
+  ;LDA IsOnMapMenu
+  ;BNE +
+  ;RTS
 
-+
+;+
   LDA lobyte(MenuTexts)
-  STA TempAddr
-  LDA hibyte(MenuTexts)
   STA TempAddr+1
+  LDA hibyte(MenuTexts)
+  STA TempAddr
 
   LDA #$22
   STA PpuAddr_2006
@@ -397,30 +455,30 @@ MenuTexts:
 CheckToChangeMaxDashes:
   LDX MaxDashesCount
   LDA Input
-  AND Right_Dir
+  AND #Right_Dir
   BEQ +
   AND DelayedInput
   BNE +
   INX
   CPX #$08
-  BNE UpdateMaxDashes
+  BNE ++
   LDX #$01
-  JMP UpdateMaxDashes
-+
+  JMP ++
++ ; check if pressing left
   LDA Input
-  AND Left_Dir
-  BEQ SkipUpdateMaxDashes
+  AND #Left_Dir
+  BEQ +++
   AND DelayedInput
-  BNE SkipUpdateMaxDashes
+  BNE +++
   DEX
   CPX #$00
-  BNE UpdateMaxDashes
+  BNE ++
   LDX #$07
-UpdateMaxDashes:
+++: ; do stuff
   STX MaxDashesCount
   ; JSR DrawDashesValue
   JSR $9390
-SkipUpdateMaxDashes:
++++: ; end
   LDX #$00
   RTS
 
@@ -431,7 +489,7 @@ CheckToChangeCollect:
   LSR A
   TAX
   LDA Input
-  AND Right_Dir
+  AND #Right_Dir
   BEQ +
   AND DelayedInput
   BNE +
@@ -442,7 +500,7 @@ CheckToChangeCollect:
   JMP UpdateMenuCollect
 +
   LDA Input
-  AND Left_Dir
+  AND #Left_Dir
   BEQ SkipUpdateMenuCollect
   AND DelayedInput
   BNE SkipUpdateMenuCollect

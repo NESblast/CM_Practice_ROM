@@ -68,7 +68,6 @@ WarpIDLast = $7FD
 ; Cartridge Ram Vars
 .BANK 5 SLOT "RAM_CART"
 
-MenuIsToggling = $1380
 Square1SoundQueue = $1804
 MaxDashesCount = $1F03
 

@@ -1,3 +1,55 @@
+NesInternalRam:0000:Temp_Var1
+NesInternalRam:0001:Temp_Var2
+NesInternalRam:0002:Temp_Var3
+NesInternalRam:0003:Temp_Var4
+NesInternalRam:0004:Temp_Var5
+NesInternalRam:0005:Temp_Var6
+NesInternalRam:0006:Temp_Var7
+NesInternalRam:0007:Temp_Var8
+NesInternalRam:0000:TempAddr
+NesInternalRam:000E:PlayerState:If this value is equal to 8, the player can control Mario.
+NesInternalRam:0020:AirborneState:0 = standing on ground, 1 = jumping, 2 = falling
+NesInternalRam:0046:MapCursorX
+NesInternalRam:0047:MapCursorY
+NesInternalRam:00E2:Input
+NesInternalRam:00E3:DelayedInput
+NesInternalRam:0050:XSpeed:The horizontal speed that Mario is trying to go. This does not account for any external speed changes (moving platforms, slopes, etc.)
+NesInternalRam:008F:YSpeed:The vertical speed that Mario is trying to go, positive down.
+NesInternalRam:0065:XPage:The horizontal screen page that Mario is currently on.
+NesInternalRam:007A:XPixel:The horizontal pixel that Mario is at.
+NesInternalRam:00B9:YPixel:The vertical pixel that Mario is at. Higher value = lower on the screen.
+NesInternalRam:03C0:XSubspeed:Essentially Marioâ€™s acceleration value. When it is high, he will accelerate quicker, and when it is low, he will decelerate quicker.
+NesInternalRam:03EB:YSubspeed:Marioâ€™s vertical acceleration.
+NesInternalRam:03C1:XSubpixel:The horizontal subpixel that Mario is at. Though there is no visible difference, a higher value means further to the right.
+NesInternalRam:03D6:YSubpixel:Marioâ€™s vertical subpixel
+NesInternalRam:04BD:IsInMap
+NesInternalRam:052B:SpeedBoostBonus:If this value is 16, then speed boost is active
+NesInternalRam:052C:SpeedBoostTimer:In order for the speed boost to activate, this timer must count up to 96.
+NesInternalRam:0545:DashTimer:A dash will last until this timer is complete
+NesInternalRam:0546:DashReadyTimer:When a dash is initiated, the game will freeze until this timer is complete.
+NesInternalRam:057F:WorldNumber
+NesInternalRam:070C:GroundedStatus:A moon will not be counted until Mario is on solid ground. If this is equal to 1, Mario can collect a moon.
+NesInternalRam:070F:DreamBlockStatus:7D = inside dream block, 7E = exiting dream block
+NesInternalRam:0743:PPUMaskVar
+NesInternalRam:074D:RoomID
+NesInternalRam:074E:RoomIDTemp
+NesInternalRam:0751:SpawnTypeUsed
+NesInternalRam:0753:SpawnXHigh
+NesInternalRam:0758:SpawnX
+NesInternalRam:0759:SpawnYHigh
+NesInternalRam:075A:SpawnY
+NesInternalRam:075B:RoomOffset
+NesInternalRam:075C:SpawnType
+NesInternalRam:079C:WallJumpLeniencyTimer:If the timer is at 2 or higher, Mario can wall jump.
+NesInternalRam:079D:WallKickTimer:After a wall kick, Mario will be forced away from the wall until this timer is complete
+NesInternalRam:07F8:PracticeFlags
+NesInternalRam:07F9:MenuSelector
+NesInternalRam:07FA:IsOnMapMenu
+NesInternalRam:07FB:TempWorldNumber
+NesInternalRam:07FC:WarpWorldLast
+NesInternalRam:07FD:WarpIDLast
+NesSaveRam:1804:Square1SoundQueue
+NesSaveRam:1F03:MaxDashesCount
 NesPrgRom:11d1:PPUReturn
 NesPrgRom:1e82:CheckSelect
 NesPrgRom:1f20:InputViewer
@@ -6,20 +58,17 @@ NesPrgRom:1f62:NoInput
 NesPrgRom:1f7b:DrawHUDValues
 NesPrgRom:3cb49:BEQMapRoutine
 NesPrgRom:3d120:MapRoutine
-NesPrgRom:3d141:JumpBackFromMapRoutine
-NesPrgRom:3d144:MapMenuToggle
-NesPrgRom:3d15a:GoThroughSettings
-NesPrgRom:3d16d:MenuSettingsAddr
-NesPrgRom:3d16d:UpdateXYMapTiles
+NesPrgRom:3d13c:JumpBackFromMapRoutine
+NesPrgRom:3d13f:MapMenuToggle
+NesPrgRom:3d155:MenuIsToggling
+NesPrgRom:3d160:GoThroughSettings
+NesPrgRom:3d173:MenuSettingsAddr
+NesPrgRom:3d175:CheckToChangeMapWorld
+NesPrgRom:3d1b7:UpdateXYMapTiles
 NesPrgRom:3d5c0:MenuRoutine
-NesPrgRom:3d5dc:CheckDown
-NesPrgRom:3d5f8:Label
-NesPrgRom:3d610:FirstColumn
 NesPrgRom:3d619:UpdateMenuTexts
-NesPrgRom:3d6d0:MenuTexts
+NesPrgRom:3d6ca:MenuTexts
 NesPrgRom:3d760:CheckToChangeMaxDashes
-NesPrgRom:3d788:UpdateMaxDashes
-NesPrgRom:3d78e:SkipUpdateMaxDashes
 NesPrgRom:3d791:CheckToChangeCollect
 NesPrgRom:3d7bc:UpdateMenuCollect
 NesPrgRom:3d7ca:SkipUpdateMenuCollect
