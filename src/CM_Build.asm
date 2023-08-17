@@ -14,7 +14,7 @@ BANKSTOTAL   48
 BANKSIZE   $2000
 BANKS      48
 .ENDRO
-.16BIT
+
 .BACKGROUND "CM_1_0_noheader.nes"
 
 .INCLUDE "NES_labels.asm"
@@ -73,22 +73,22 @@ InputViewer:
     STA PpuControl_2000
     LDX #$20
     LDY #$03
-    LDA #$08
+    LDA Up_Dir
     JSR InputPPUWrite
     LDY #$04
-    LDA #$40
+    LDA B_Button
     JSR InputPPUWrite
     LDY #$05
-    LDA #$80
+    LDA A_Button
     JSR InputPPUWrite
     LDY #$22
-    LDA #$02
+    LDA Left_Dir
     JSR InputPPUWrite
     LDY #$23
-    LDA #$04
+    LDA Down_Dir
     JSR InputPPUWrite
     LDY #$24
-    LDA #$01
+    LDA Right_Dir
     JSR InputPPUWrite
     JMP CheckSelect
 InputPPUWrite:
@@ -133,9 +133,40 @@ DrawHUDValues:
     LDY #$24
     JMP PPUReturn
 
-
 .BANK $1E SLOT "$8000"
 
+; hijack and transfer the player to the menu routine
+.ORG $0B3C
+  BEQ $8B49
+
+.ORG $0B49
+  JMP MapRoutine
+
+.ORG $1120
+MapRoutine:
+  LDA #%00011000
+  STA PPUMaskVar
+
+  LDA IsInMap
+  AND #%10000000
+  BNE JumpBackFromMapRoutine
+
+  JSR MapMenuToggle
+  LDX IsOnMapMenu
+  BEQ +
+
+  JSR MenuRoutine
+  JSR GoThroughSettings
+  LDA #$00
++
+  JMP UpdateXYMapTiles
+  LDA #$00
+JumpBackFromMapRoutine:
+  JMP $8B4E
+
+  
+
+  
 .ORG $155A
 .db "World"
 .db "Dashes"
@@ -146,13 +177,14 @@ DrawHUDValues:
 .db "Respawn"
 .db "Powerups"
 
+
 .ORG $15C0
 MenuRoutine:
   LDA Input
-  AND #$08
-  BEQ CheckLeft
+  AND Up_Dir
+  BEQ CheckDown
   AND DelayedInput
-  BNE CheckLeft
+  BNE CheckDown
 
 ; play stomp SFX
   LDX Sfx_StompSQ
@@ -163,9 +195,9 @@ MenuRoutine:
   LDA #$07
   STA MenuSelector
   JMP Label
-CheckLeft:
+CheckDown:
   LDA Input
-  AND #$04
+  AND Down_Dir
   BEQ Label
   AND DelayedInput
   BNE Label
@@ -201,7 +233,6 @@ FirstColumn:
   STA $0233
   RTS
 
-.ORG $1640
 UpdateMenuTexts:
   LDA IsOnMapMenu
   BNE +
@@ -309,5 +340,75 @@ UpdateMenuTexts:
   INY
   DEX
   BNE -
+  RTS
+
+.ORG $1760
+CheckToChangeMaxDashes:
+  LDX MaxDashesCount
+  LDA Input
+  AND Right_Dir
+  BEQ +
+  AND DelayedInput
+  BNE +
+  INX
+  CPX #$08
+  BNE UpdateMaxDashes
+  LDX #$01
+  JMP UpdateMaxDashes
++
+  LDA Input
+  AND Left_Dir
+  BEQ SkipUpdateMaxDashes
+  AND DelayedInput
+  BNE SkipUpdateMaxDashes
+  DEX
+  CPX #$00
+  BNE UpdateMaxDashes
+  LDX #$07
+UpdateMaxDashes:
+  STX MaxDashesCount
+  ; JSR DrawDashesValue
+  JSR $9390
+SkipUpdateMaxDashes:
+  LDX #$00
+  RTS
+
+CheckToChangeCollect:
+  LDA PracticeFlags
+  TAY
+  AND #%00000110
+  LSR A
+  TAX
+  LDA Input
+  AND Right_Dir
+  BEQ +
+  AND DelayedInput
+  BNE +
+  INX
+  CPX #$04
+  BNE UpdateMenuCollect
+  LDX #$00
+  JMP UpdateMenuCollect
++
+  LDA Input
+  AND Left_Dir
+  BEQ SkipUpdateMenuCollect
+  AND DelayedInput
+  BNE SkipUpdateMenuCollect
+  DEX
+  BPL UpdateMenuCollect
+  LDX #$03
+UpdateMenuCollect:
+  TXA
+  ASL A
+  STA PracticeFlags
+  TYA
+  AND #$F9
+  ADC PracticeFlags
+  STA PracticeFlags
+  ; JSR DrawCollectValues
+  ; JSR PlaySwooshSFX
+SkipUpdateMenuCollect:
+  LDX #$00
   RTS
 

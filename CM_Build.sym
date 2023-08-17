@@ -1,6 +1,5 @@
 ; this file was created with wlalink by ville helin <ville.helin@iki.fi>.
 ; no$gmb symbolic information for "CM_Build.nes".
-00:6010 aRamValueCart
 00:91d1 PPUReturn
 00:9e82 CheckSelect
 00:9f20 InputViewer
@@ -8,7 +7,13 @@
 00:9f62 NoInput
 00:9f7b DrawHUDValues
 1e:95c0 MenuRoutine
-1e:95dc CheckLeft
+1e:95dc CheckDown
 1e:95f8 Label
 1e:9610 FirstColumn
-1e:9640 UpdateMenuTexts
+1e:9619 UpdateMenuTexts
+1e:9760 CheckToChangeMaxDashes
+1e:9788 UpdateMaxDashes
+1e:978e SkipUpdateMaxDashes
+1e:9791 CheckToChangeCollect
+1e:97bc UpdateMenuCollect
+1e:97ca SkipUpdateMenuCollect

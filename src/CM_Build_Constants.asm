@@ -1,3 +1,14 @@
+; inputs
+A_Button              = %10000000
+B_Button              = %01000000
+Select_Button         = %00100000
+Start_Button          = %00010000
+Up_Dir                = %00001000
+Down_Dir              = %00000100
+Left_Dir              = %00000010
+Right_Dir             = %00000001
+
+
 ;sound effects constants
 ;SQ1
 Sfx_StompSQ				= 22
@@ -46,3 +57,6 @@ Sfx_BrickShatter      = 24
 Sfx_BombNOI			= 27
 Sfx_GetDiamondNOI			= 29
 Sfx_CelesteDash			= 30
+
+; menu related consts
+Menu_Rows = 8

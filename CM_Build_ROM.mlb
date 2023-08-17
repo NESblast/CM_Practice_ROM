@@ -1,4 +1,3 @@
-NesSaveRam:0010:aRamValueCart
 NesPrgRom:11d1:PPUReturn
 NesPrgRom:1e82:CheckSelect
 NesPrgRom:1f20:InputViewer
@@ -6,7 +5,13 @@ NesPrgRom:1f54:InputPPUWrite
 NesPrgRom:1f62:NoInput
 NesPrgRom:1f7b:DrawHUDValues
 NesPrgRom:3d5c0:MenuRoutine
-NesPrgRom:3d5dc:CheckLeft
+NesPrgRom:3d5dc:CheckDown
 NesPrgRom:3d5f8:Label
 NesPrgRom:3d610:FirstColumn
-NesPrgRom:3d640:UpdateMenuTexts
+NesPrgRom:3d619:UpdateMenuTexts
+NesPrgRom:3d760:CheckToChangeMaxDashes
+NesPrgRom:3d788:UpdateMaxDashes
+NesPrgRom:3d78e:SkipUpdateMaxDashes
+NesPrgRom:3d791:CheckToChangeCollect
+NesPrgRom:3d7bc:UpdateMenuCollect
+NesPrgRom:3d7ca:SkipUpdateMenuCollect

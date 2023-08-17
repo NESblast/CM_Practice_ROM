@@ -43,13 +43,15 @@ SpawnType = $75C
 WallJumpLeniencyTimer = $79C	  ;If the timer is at 2 or higher, Mario can wall jump.
 WallKickTimer = $79D		        ;After a wall kick, Mario will be forced away from the wall until this timer is complete
 
-IsOnMapMenu = $07FA
+PracticeFlags = $7F8
+MenuSelector = $7F9
+IsOnMapMenu = $7FA
 WarpWorldLast = $7FC
 WarpIDLast = $7FD
-MenuSelector = $07F9
 
 ; Cartridge Ram Vars
-.BANK 0 SLOT "RAM_CART"
+.BANK 5 SLOT "RAM_CART"
 
 Square1SoundQueue = $1804
+MaxDashesCount = $1F03
 
