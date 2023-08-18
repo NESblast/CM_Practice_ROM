@@ -74,22 +74,22 @@ InputViewer:
     STA PpuControl_2000
     LDX #$20
     LDY #$03
-    LDA Up_Dir
+    LDA #Up_Dir
     JSR InputPPUWrite
     LDY #$04
-    LDA B_Button
+    LDA #B_Button
     JSR InputPPUWrite
     LDY #$05
-    LDA A_Button
+    LDA #A_Button
     JSR InputPPUWrite
     LDY #$22
-    LDA Left_Dir
+    LDA #Left_Dir
     JSR InputPPUWrite
     LDY #$23
-    LDA Down_Dir
+    LDA #Down_Dir
     JSR InputPPUWrite
     LDY #$24
-    LDA Right_Dir
+    LDA #Right_Dir
     JSR InputPPUWrite
     JMP CheckSelect
 InputPPUWrite:
