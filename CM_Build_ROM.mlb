@@ -1,6 +1,7 @@
 NesInternalRam:0000:Temp_Var1
 NesInternalRam:0001:Temp_Var2
 NesInternalRam:0002:Temp_Var3
+NesInternalRam:0002:TempRoomID
 NesInternalRam:0003:Temp_Var4
 NesInternalRam:0004:Temp_Var5
 NesInternalRam:0005:Temp_Var6
@@ -48,13 +49,19 @@ NesInternalRam:07FA:IsOnMapMenu
 NesInternalRam:07FB:TempWorldNumber
 NesInternalRam:07FC:WarpWorldLast
 NesInternalRam:07FD:WarpIDLast
+NesInternalRam:<07FE:ColdBootOffset:Constant
+NesInternalRam:07FF:CompatibilityID:0=all compatible, 1=ExRAM not supported, 2=joypad reading not compatible
 NesSaveRam:1804:Square1SoundQueue
 NesSaveRam:1F03:MaxDashesCount
+NesSaveRam:7A00:MinimapFlags
+NesSaveRam:7B00:MinimapTiles
+NesSaveRam:1C07:PPUIORoutine:If non-zero and in cutscene, IRQ type is altered.
+NesSaveRam:1C08:PPUIOStep:Coefficient, usually downcounting
 NesPrgRom:11d1:PPUReturn
+NesPrgRom:17d0:StartPressed
 NesPrgRom:1e82:CheckSelect
 NesPrgRom:1f20:InputViewer
 NesPrgRom:1f54:InputPPUWrite
-NesPrgRom:1f62:NoInput
 NesPrgRom:1f7b:DrawHUDValues
 NesPrgRom:3cb49:BEQMapRoutine
 NesPrgRom:3d120:MapRoutine
@@ -64,11 +71,14 @@ NesPrgRom:3d155:MenuIsToggling
 NesPrgRom:3d160:GoThroughSettings
 NesPrgRom:3d173:MenuSettingsAddr
 NesPrgRom:3d175:CheckToChangeMapWorld
-NesPrgRom:3d1b7:UpdateXYMapTiles
+NesPrgRom:3d1c5:UpdateXYMapTiles
 NesPrgRom:3d5c0:MenuRoutine
 NesPrgRom:3d619:UpdateMenuTexts
-NesPrgRom:3d6ca:MenuTexts
-NesPrgRom:3d760:CheckToChangeMaxDashes
-NesPrgRom:3d791:CheckToChangeCollect
-NesPrgRom:3d7bc:UpdateMenuCollect
-NesPrgRom:3d7ca:SkipUpdateMenuCollect
+NesPrgRom:3d69a:DrawLoop
+NesPrgRom:3d6a4:MenuTexts
+NesPrgRom:3d6dc:ChangeMapTiles
+NesPrgRom:3d789:CheckToChangeMaxDashes
+NesPrgRom:3d7ba:CheckToChangeCollect
+NesPrgRom:3d7e5:UpdateMenuCollect
+NesPrgRom:3d7f6:SkipUpdateMenuCollect
+NesPrgRom:3d7f9:PlaySwooshSFX

@@ -3,7 +3,10 @@
 
 Temp_Var1 = $00
 Temp_Var2 = $01
+
 Temp_Var3 = $02
+TempRoomID = $02
+
 Temp_Var4 = $03
 Temp_Var5 = $04
 Temp_Var6 = $05
@@ -65,9 +68,17 @@ TempWorldNumber = $7FB
 WarpWorldLast = $7FC
 WarpIDLast = $7FD
 
+ColdBootOffset = <$07FE ;Constant
+CompatibilityID	= $07FF ;0=all compatible, 1=ExRAM not supported, 2=joypad reading not compatible
+
 ; Cartridge Ram Vars
-.BANK 5 SLOT "RAM_CART"
+.BANK 0 SLOT "RAM_CART"
 
-Square1SoundQueue = $1804
-MaxDashesCount = $1F03
+Square1SoundQueue = $7804
+MaxDashesCount = $7F03
 
+MinimapFlags = $7A00
+MinimapTiles = $7B00
+
+PPUIORoutine = $7C07 ;If non-zero and in cutscene, IRQ type is altered.
+PPUIOStep = $7C08 ;Coefficient, usually downcounting

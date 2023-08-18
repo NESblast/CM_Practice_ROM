@@ -5,7 +5,7 @@ SLOT 0      $8000       "$8000"
 SLOT 1      $A000       "$A000"
 SLOT 2      $C000       
 SLOT 3      $E000
-SLOT 4 		$0000		"RAM_NES"
+SLOT 4 		  $0000		"RAM_NES"
 SLOT 5 	    $6000		"RAM_CART"
 .ENDME
 
@@ -33,6 +33,10 @@ BANKS      48
 .db "PRACTICE ROM V1.03         "
 
 .BANK 0 SLOT "$8000"
+
+.ORG $0314
+  JSR StartPressed
+
 .ORG $1129
 
     JMP InputViewer
@@ -52,6 +56,19 @@ PPUReturn:
     STA PpuAddr_2006
     LDA $0E
     CMP #$0B
+
+.ORG $17D0
+StartPressed:
+  LDA WorldNumber
+  STA TempWorldNumber
+  LDA IsInMap
+  AND #%00000001
+  BEQ +
+  LDA WorldNumber
+  ; JSR UpdateMapTiles
+  LDA IsInMap
++
+  RTS
 
 
 .ORG $1E82
@@ -96,11 +113,11 @@ InputPPUWrite:
     STX PpuAddr_2006
     STY PpuAddr_2006
     AND Input
-    BEQ NoInput
+    BEQ +
     TYA
     ADC #$10
     TAY
-NoInput:
++
     STY PpuData_2007
     RTS
 
@@ -254,20 +271,20 @@ CheckToChangeMapWorld:
   STX TempWorldNumber
   CLC
   ;JSR DrawWorldValue
+  INC PPUIOStep
   LDA #$00
-  ;INC DrawMapRowCounter
   STA PPU_MASK
   LDA #$30
   STA PpuAddr_2006
   LDA #$00
   STA PpuAddr_2006
-  TXA
-  ;JSR ChangeMapTiles
+  TXA ; TempWorldNumber
+  JSR ChangeMapTiles
   LDA #$81
   STA IsInMap
-  ;LDA #$0A
-  ;STA DrawMapFlags
-  ;JSR PlaySwooshSFX
+  LDA #$0A
+  STA PPUIORoutine
+  JSR PlaySwooshSFX
 +++
   RTS
 
@@ -367,98 +384,65 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDA #$46
   STA PpuAddr_2006
-
   LDX #$05
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$22
   STA PpuAddr_2006
   LDA #$65
   STA PpuAddr_2006
   LDX #$06
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$22
   STA PpuAddr_2006
   LDA #$84
   STA PpuAddr_2006
   LDX #$07
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$22
   STA PpuAddr_2006
   LDA #$A4
   STA PpuAddr_2006
   LDX #$07
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$22
   STA PpuAddr_2006
   LDA #$C5
   STA PpuAddr_2006
   LDX #$06
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$22
   STA PpuAddr_2006
   LDA #$E1
   STA PpuAddr_2006
   LDX #$0A
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$23
   STA PpuAddr_2006
   LDA #$04
   STA PpuAddr_2006
   LDX #$07
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$22
   STA PpuAddr_2006
   LDA #$57
   STA PpuAddr_2006
   LDX #$08
--
+  JSR DrawLoop
+  RTS
+
+DrawLoop:
   LDA (TempAddr),Y
   STA PpuData_2007
   INY
   DEX
-  BNE -
+  BNE DrawLoop
   RTS
 
 MenuTexts:
@@ -471,7 +455,102 @@ MenuTexts:
 .db "Respawn"
 .db "Powerups"
 
-.ORG $1760
+ChangeMapTiles:
+  CLC
+  ADC #$9F
+  STA $07
+  AND #$1F
+  LDY #$00
+  STY $06
+  STY $04
+  LSR A
+  ROR $04
+  LSR A
+  ROR $04
+  ORA #$70
+  STA $05
+  LDA #$8C
+  STA PRGPort1
+  LDY #$FF
+  STY TempRoomID
+  LDY #$3F
+-
+  LDA #$01
+  STA RAMPort
+  LDA ($04),Y
+  DEY
+  STY $03
+  LDY #$00
+  STY RAMPort
+  LDY TempRoomID
+  PHA
+  AND #$C0
+  STA $00
+  LDA ($06),Y
+  STA MinimapTiles,Y
+  AND #$3F
+  ORA $00
+  STA MinimapFlags,Y
+  JSR +
+  PLA
+  ASL A
+  ASL A
+  DEY
+  PHA
+  AND #$C0
+  STA $00
+  LDA ($06),Y
+  STA MinimapTiles,Y
+  AND #$3F
+  ORA $00
+  STA MinimapFlags,Y
+  JSR +
+  PLA
+  ASL A
+  ASL A
+  DEY
+  PHA
+  AND #$C0
+  STA $00
+  LDA ($06),Y
+  STA MinimapTiles,Y
+  AND #$3F
+  ORA $00
+  STA MinimapFlags,Y
+  JSR +
+  PLA
+  ASL A
+  ASL A
+  DEY
+  PHA
+  AND #$C0
+  STA $00
+  LDA ($06),Y
+  STA MinimapTiles,Y
+  AND #$3F
+  ORA $00
+  STA MinimapFlags,Y
+  JSR +
+  PLA
+  ASL A
+  ASL A
+  DEY
+  STY TempRoomID
+  LDY $03
+  BMI ++
+  JMP -
++
+  TAX
+  AND #$0F
+  STA $07FE
+  TXA
+  AND #$F0
+++
+  ASL A
+  ORA $07FE
+  STA $7B00,Y
+  RTS
+
 CheckToChangeMaxDashes:
   LDX MaxDashesCount
   LDA Input
@@ -497,7 +576,8 @@ CheckToChangeMaxDashes:
 ++: ; do stuff
   STX MaxDashesCount
   ; JSR DrawDashesValue
-  JSR $9390
+  ; JSR $9390
+  JSR PlaySwooshSFX
 +++: ; end
   LDX #$00
   RTS
@@ -536,9 +616,15 @@ UpdateMenuCollect:
   ADC PracticeFlags
   STA PracticeFlags
   ; JSR DrawCollectValues
-  ; JSR PlaySwooshSFX
+  JSR PlaySwooshSFX
 SkipUpdateMenuCollect:
   LDX #$00
   RTS
+
+PlaySwooshSFX:
+  LDA #Sfx_StompNOI
+  STA Square1SoundQueue
+  RTS
+
 	
 

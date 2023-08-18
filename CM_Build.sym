@@ -1,10 +1,10 @@
 ; this file was created with wlalink by ville helin <ville.helin@iki.fi>.
 ; no$gmb symbolic information for "CM_Build.nes".
 00:91d1 PPUReturn
+00:97d0 StartPressed
 00:9e82 CheckSelect
 00:9f20 InputViewer
 00:9f54 InputPPUWrite
-00:9f62 NoInput
 00:9f7b DrawHUDValues
 1e:8b49 BEQMapRoutine
 1e:9120 MapRoutine
@@ -14,11 +14,14 @@
 1e:9160 GoThroughSettings
 1e:9173 MenuSettingsAddr
 1e:9175 CheckToChangeMapWorld
-1e:91b7 UpdateXYMapTiles
+1e:91c5 UpdateXYMapTiles
 1e:95c0 MenuRoutine
 1e:9619 UpdateMenuTexts
-1e:96ca MenuTexts
-1e:9760 CheckToChangeMaxDashes
-1e:9791 CheckToChangeCollect
-1e:97bc UpdateMenuCollect
-1e:97ca SkipUpdateMenuCollect
+1e:969a DrawLoop
+1e:96a4 MenuTexts
+1e:96dc ChangeMapTiles
+1e:9789 CheckToChangeMaxDashes
+1e:97ba CheckToChangeCollect
+1e:97e5 UpdateMenuCollect
+1e:97f6 SkipUpdateMenuCollect
+1e:97f9 PlaySwooshSFX
