@@ -37,6 +37,12 @@ foreach ($line in $content) {
         else {
             $content_after_semicolon = ":"+$content_after_semicolon
         }
+
+        # Convert cart ram values to $0000-$1FFFF
+        if($mesen_prefix -eq "NesSaveRam:"){
+            $cartram_converted_value = [convert]::ToInt32($content_before_semicolon, 16) % 8192
+            $content_before_semicolon = [convert]::ToString($cartram_converted_value, 16).PadLeft(4, '0')
+        }
         
         $output_file.WriteLine($mesen_prefix+$content_before_semicolon.PadLeft(4, '0')+":"+$content_before_eq+$content_after_semicolon)
 

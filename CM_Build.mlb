@@ -1,5 +1,0 @@
-NesMemory:0010:ramValueNES
-NesSaveRam:0010:ramValueCart
-NesPrgRom:5f00:aLabel
-NesPrgRom:9f00:aLabel2
-NesPrgRom:df06:aLabel3
