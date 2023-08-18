@@ -17,7 +17,8 @@
 1e:91b7 UpdateXYMapTiles
 1e:95c0 MenuRoutine
 1e:9619 UpdateMenuTexts
-1e:96ca MenuTexts
+1e:969a DrawLoop
+1e:96a4 MenuTexts
 1e:9760 CheckToChangeMaxDashes
 1e:9791 CheckToChangeCollect
 1e:97bc UpdateMenuCollect

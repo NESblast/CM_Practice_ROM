@@ -367,98 +367,65 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDA #$46
   STA PpuAddr_2006
-
   LDX #$05
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$22
   STA PpuAddr_2006
   LDA #$65
   STA PpuAddr_2006
   LDX #$06
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$22
   STA PpuAddr_2006
   LDA #$84
   STA PpuAddr_2006
   LDX #$07
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$22
   STA PpuAddr_2006
   LDA #$A4
   STA PpuAddr_2006
   LDX #$07
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$22
   STA PpuAddr_2006
   LDA #$C5
   STA PpuAddr_2006
   LDX #$06
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$22
   STA PpuAddr_2006
   LDA #$E1
   STA PpuAddr_2006
   LDX #$0A
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$23
   STA PpuAddr_2006
   LDA #$04
   STA PpuAddr_2006
   LDX #$07
--
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE -
+  JSR DrawLoop
 
   LDA #$22
   STA PpuAddr_2006
   LDA #$57
   STA PpuAddr_2006
   LDX #$08
--
+  JSR DrawLoop
+  RTS
+
+DrawLoop:
   LDA (TempAddr),Y
   STA PpuData_2007
   INY
   DEX
-  BNE -
+  BNE DrawLoop
   RTS
 
 MenuTexts:
@@ -471,7 +438,6 @@ MenuTexts:
 .db "Respawn"
 .db "Powerups"
 
-.ORG $1760
 CheckToChangeMaxDashes:
   LDX MaxDashesCount
   LDA Input
