@@ -67,7 +67,8 @@ NesPrgRom:3d175:CheckToChangeMapWorld
 NesPrgRom:3d1b7:UpdateXYMapTiles
 NesPrgRom:3d5c0:MenuRoutine
 NesPrgRom:3d619:UpdateMenuTexts
-NesPrgRom:3d6ca:MenuTexts
+NesPrgRom:3d69a:DrawLoop
+NesPrgRom:3d6a4:MenuTexts
 NesPrgRom:3d760:CheckToChangeMaxDashes
 NesPrgRom:3d791:CheckToChangeCollect
 NesPrgRom:3d7bc:UpdateMenuCollect
