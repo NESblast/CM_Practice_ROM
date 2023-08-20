@@ -30,6 +30,8 @@ XPage = $065	                ;The horizontal screen page that Mario is currently
 XPixel = $07A		                ;The horizontal pixel that Mario is at.
 YPixel = $0B9		                ;The vertical pixel that Mario is at. Higher value = lower on the screen.
 
+MinimapOffset = $119 ;Calculated by the minimap updater
+
 XSubspeed = $3C0	            ;Essentially Mario’s acceleration value. When it is high, he will accelerate quicker, and when it is low, he will decelerate quicker.
 YSubspeed	 = $3EB	            ;Mario’s vertical acceleration.
 XSubpixel	 = $3C1	            ;The horizontal subpixel that Mario is at. Though there is no visible difference, a higher value means further to the right.
@@ -74,11 +76,14 @@ CompatibilityID	= $07FF ;0=all compatible, 1=ExRAM not supported, 2=joypad readi
 ; Cartridge Ram Vars
 .BANK 5 SLOT "RAM_CART"
 
-Square1SoundQueue = $1804
-MaxDashesCount = $1F03
+Square1SoundQueue = $7804
+MaxDashesCount = $7F03
 
 MinimapFlags = $7A00
 MinimapTiles = $7B00
 
-PPUIORoutine = $1C07 ;If non-zero and in cutscene, IRQ type is altered.
-PPUIOStep = $1C08 ;Coefficient, usually downcounting
+PPUIORoutine = $7C07 ;If non-zero and in cutscene, IRQ type is altered.
+PPUIOStep = $7C08 ;Coefficient, usually downcounting
+
+ExclamSwitchStatus = $7F16 ;Lowest two or three bits deciding which switches are on
+SpawnSwitchStatus = $7F16 ;Lowest two or three bits deciding which switches are on

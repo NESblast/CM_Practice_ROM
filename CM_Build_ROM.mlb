@@ -19,6 +19,7 @@ NesInternalRam:008F:YSpeed:The vertical speed that Mario is trying to go, positi
 NesInternalRam:0065:XPage:The horizontal screen page that Mario is currently on.
 NesInternalRam:007A:XPixel:The horizontal pixel that Mario is at.
 NesInternalRam:00B9:YPixel:The vertical pixel that Mario is at. Higher value = lower on the screen.
+NesInternalRam:0119:MinimapOffset:Calculated by the minimap updater
 NesInternalRam:03C0:XSubspeed:Essentially Marioâ€™s acceleration value. When it is high, he will accelerate quicker, and when it is low, he will decelerate quicker.
 NesInternalRam:03EB:YSubspeed:Marioâ€™s vertical acceleration.
 NesInternalRam:03C1:XSubpixel:The horizontal subpixel that Mario is at. Though there is no visible difference, a higher value means further to the right.
@@ -51,18 +52,57 @@ NesInternalRam:07FC:WarpWorldLast
 NesInternalRam:07FD:WarpIDLast
 NesInternalRam:<07FE:ColdBootOffset:Constant
 NesInternalRam:07FF:CompatibilityID:0=all compatible, 1=ExRAM not supported, 2=joypad reading not compatible
-NesSaveRam:1804:Square1SoundQueue
-NesSaveRam:1F03:MaxDashesCount
+NesSaveRam:7804:Square1SoundQueue
+NesSaveRam:7F03:MaxDashesCount
 NesSaveRam:7A00:MinimapFlags
 NesSaveRam:7B00:MinimapTiles
-NesSaveRam:1C07:PPUIORoutine:If non-zero and in cutscene, IRQ type is altered.
-NesSaveRam:1C08:PPUIOStep:Coefficient, usually downcounting
+NesSaveRam:7C07:PPUIORoutine:If non-zero and in cutscene, IRQ type is altered.
+NesSaveRam:7C08:PPUIOStep:Coefficient, usually downcounting
+NesSaveRam:7F16:ExclamSwitchStatus:Lowest two or three bits deciding which switches are on
+NesSaveRam:7F16:SpawnSwitchStatus:Lowest two or three bits deciding which switches are on
+NesPrgRom:03cf:SetCursorPosition
+NesPrgRom:04a6:MapWarper
+NesPrgRom:0520:MapWarp
+NesPrgRom:0570:MapWarperRTS
+NesPrgRom:1fe0:MapGetData
+NesPrgRom:1176:CheckIfCanMoveMapCursor
 NesPrgRom:11d1:PPUReturn
-NesPrgRom:17d0:StartPressed
-NesPrgRom:1e82:CheckSelect
-NesPrgRom:1f20:InputViewer
-NesPrgRom:1f54:InputPPUWrite
-NesPrgRom:1f7b:DrawHUDValues
+NesPrgRom:17d2:StartPressed
+NesPrgRom:17d5:Here
+NesPrgRom:1d9d:ItemGetTextPointers
+NesPrgRom:1dca:SaveGame_Intro
+NesPrgRom:1dd7:CannotSave_Intro
+NesPrgRom:1de5:MAGShroom_Intro
+NesPrgRom:1de5:VITUpgrade_Intro
+NesPrgRom:1de5:MAGUpgrade_Intro
+NesPrgRom:1dfc:PowerMoon_Intro
+NesPrgRom:1e0d:GiantMoon_Intro
+NesPrgRom:1e24:Feather_Intro
+NesPrgRom:1e24:DoubleJump_Intro
+NesPrgRom:1e24:Shapeshift_Intro
+NesPrgRom:1e24:TheWorld_Intro
+NesPrgRom:1e24:XRay_Intro
+NesPrgRom:1e31:Starman_Intro
+NesPrgRom:1e31:SpeedBooster_Intro
+NesPrgRom:1e31:ScrewAttack_Intro
+NesPrgRom:1e31:FireSuit_Intro
+NesPrgRom:1e31:ChargeShot_Intro
+NesPrgRom:1e3b:SuperFire_Intro
+NesPrgRom:1e3b:UltraFire_Intro
+NesPrgRom:1e3b:SpringBoots_Intro
+NesPrgRom:1e3b:Morphball_Intro
+NesPrgRom:1e3b:WallGrip_Intro
+NesPrgRom:1e46:FastTravel_Intro
+NesPrgRom:1e46:IceFlower_Intro
+NesPrgRom:1e46:CheckSelect
+NesPrgRom:1e59:InputViewer
+NesPrgRom:1e8d:InputPPUWrite
+NesPrgRom:1e9f:DrawHUDValues
+NesPrgRom:1ed4:MapWarpRest
+NesPrgRom:3ba20:AddIRQFix
+NesPrgRom:1af0d:MapTopTextFirstRow
+NesPrgRom:1af19:MapTopTextSecondRow
+NesPrgRom:1b760:DrawMapTopText
 NesPrgRom:3cb49:BEQMapRoutine
 NesPrgRom:3d120:MapRoutine
 NesPrgRom:3d13c:JumpBackFromMapRoutine
