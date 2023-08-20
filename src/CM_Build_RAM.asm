@@ -74,7 +74,7 @@ ColdBootOffset = <$07FE ;Constant
 CompatibilityID	= $07FF ;0=all compatible, 1=ExRAM not supported, 2=joypad reading not compatible
 
 ; Cartridge Ram Vars
-.BANK 5 SLOT "RAM_CART"
+.BANK 0 SLOT "RAM_CART"
 
 Square1SoundQueue = $7804
 MaxDashesCount = $7F03
@@ -82,8 +82,5 @@ MaxDashesCount = $7F03
 MinimapFlags = $7A00
 MinimapTiles = $7B00
 
-PPUIORoutine = $7C07 ;If non-zero and in cutscene, IRQ type is altered.
-PPUIOStep = $7C08 ;Coefficient, usually downcounting
-
-ExclamSwitchStatus = $7F16 ;Lowest two or three bits deciding which switches are on
-SpawnSwitchStatus = $7F16 ;Lowest two or three bits deciding which switches are on
+PPUIORoutine = $1C07 ;If non-zero and in cutscene, IRQ type is altered.
+PPUIOStep = $1C08 ;Coefficient, usually downcounting
