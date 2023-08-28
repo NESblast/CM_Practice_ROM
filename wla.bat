@@ -14,6 +14,7 @@ IF %errorlevel% GTR 0 GOTO :pause
 
 REM Put a Shortcut for Mesen in this folder named Mesen2.lnk
 start "" Mesen2.lnk %CD%\%1_ROM.nes
+REM %vbindiff% CM_Build_ROM.NES C:\Users\Bill\Downloads\Nes\dev\celesteHack\_103k\CMZnD_Practice_Rom_v1.03k.nes
 GOTO end
 
 :pause
