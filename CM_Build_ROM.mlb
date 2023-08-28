@@ -1,4 +1,5 @@
 NesInternalRam:0000:Temp_Var1
+NesInternalRam:0000:TempAddr
 NesInternalRam:0001:Temp_Var2
 NesInternalRam:0002:Temp_Var3
 NesInternalRam:0002:TempRoomID
@@ -7,18 +8,20 @@ NesInternalRam:0004:Temp_Var5
 NesInternalRam:0005:Temp_Var6
 NesInternalRam:0006:Temp_Var7
 NesInternalRam:0007:Temp_Var8
-NesInternalRam:0000:TempAddr
 NesInternalRam:000E:PlayerState:If this value is equal to 8, the player can control Mario.
 NesInternalRam:0020:AirborneState:0 = standing on ground, 1 = jumping, 2 = falling
 NesInternalRam:0046:MapCursorX
 NesInternalRam:0047:MapCursorY
-NesInternalRam:00E2:Input
-NesInternalRam:00E3:DelayedInput
 NesInternalRam:0050:XSpeed:The horizontal speed that Mario is trying to go. This does not account for any external speed changes (moving platforms, slopes, etc.)
-NesInternalRam:008F:YSpeed:The vertical speed that Mario is trying to go, positive down.
 NesInternalRam:0065:XPage:The horizontal screen page that Mario is currently on.
 NesInternalRam:007A:XPixel:The horizontal pixel that Mario is at.
+NesInternalRam:008F:YSpeed:The vertical speed that Mario is trying to go, positive down.
 NesInternalRam:00B9:YPixel:The vertical pixel that Mario is at. Higher value = lower on the screen.
+<<<<<<< Updated upstream
+=======
+NesInternalRam:00E2:Input
+NesInternalRam:00E3:DelayedInput
+>>>>>>> Stashed changes
 NesInternalRam:0119:MinimapOffset:Calculated by the minimap updater
 NesInternalRam:03C0:XSubspeed:Essentially Marioâ€™s acceleration value. When it is high, he will accelerate quicker, and when it is low, he will decelerate quicker.
 NesInternalRam:03EB:YSubspeed:Marioâ€™s vertical acceleration.
@@ -52,6 +55,7 @@ NesInternalRam:07FC:WarpWorldLast
 NesInternalRam:07FD:WarpIDLast
 NesInternalRam:<07FE:ColdBootOffset:Constant
 NesInternalRam:07FF:CompatibilityID:0=all compatible, 1=ExRAM not supported, 2=joypad reading not compatible
+<<<<<<< Updated upstream
 NesSaveRam:7804:Square1SoundQueue
 NesSaveRam:7F03:MaxDashesCount
 NesSaveRam:7A00:MinimapFlags
@@ -103,6 +107,28 @@ NesPrgRom:3ba20:AddIRQFix
 NesPrgRom:1af0d:MapTopTextFirstRow
 NesPrgRom:1af19:MapTopTextSecondRow
 NesPrgRom:1b760:DrawMapTopText
+=======
+NesInternalRam:1C07:PPUIORoutine:If non-zero and in cutscene, IRQ type is altered.
+NesInternalRam:1C08:PPUIOStep:Coefficient, usually downcounting
+NesSaveRam:7804:Square1SoundQueue
+NesSaveRam:7A00:MinimapFlags
+NesSaveRam:7B00:MinimapTiles
+NesSaveRam:7F03:MaxDashesCount
+NesSaveRam:7F16:SpawnSwitchStatus
+NesPrgRom:0357:_insert00
+NesPrgRom:04a6:_insert01
+NesPrgRom:0519:_insert02
+NesPrgRom:1180:_insert03
+NesPrgRom:11d1:PPUReturn
+NesPrgRom:17bf:_insert04
+NesPrgRom:17d0:StartPressed
+NesPrgRom:192e:_insert05
+NesPrgRom:1e82:CheckSelect
+NesPrgRom:1f20:InputViewer
+NesPrgRom:1f54:InputPPUWrite
+NesPrgRom:1f7b:DrawHUDValues
+NesPrgRom:1fb0:_insert06
+>>>>>>> Stashed changes
 NesPrgRom:3cb49:BEQMapRoutine
 NesPrgRom:3d120:MapRoutine
 NesPrgRom:3d13c:JumpBackFromMapRoutine

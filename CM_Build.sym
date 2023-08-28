@@ -1,5 +1,6 @@
 ; this file was created with wlalink by ville helin <ville.helin@iki.fi>.
 ; no$gmb symbolic information for "CM_Build.nes".
+<<<<<<< Updated upstream
 00:83cf SetCursorPosition
 00:84a6 MapWarper
 00:8520 MapWarp
@@ -43,6 +44,21 @@
 0d:af0d MapTopTextFirstRow
 0d:af19 MapTopTextSecondRow
 0d:b760 DrawMapTopText
+=======
+00:8357 _insert00
+00:84a6 _insert01
+00:8519 _insert02
+00:9180 _insert03
+00:91d1 PPUReturn
+00:97bf _insert04
+00:97d0 StartPressed
+00:992e _insert05
+00:9e82 CheckSelect
+00:9f20 InputViewer
+00:9f54 InputPPUWrite
+00:9f7b DrawHUDValues
+00:9fb0 _insert06
+>>>>>>> Stashed changes
 1e:8b49 BEQMapRoutine
 1e:9120 MapRoutine
 1e:913c JumpBackFromMapRoutine
