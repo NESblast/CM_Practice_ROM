@@ -24,16 +24,6 @@ BANKS      48
 .INCLUDE "src\CM_Build_RAM.asm"
 .INCLUDE "src\CM_Graphics.asm"
 
-
-.BANK $0C SLOT "$A000"
-.ORG $0000
-.INCBIN "src\bank0C_mapdata.bin"
-
-; Title Screen Version
-.BANK $1D SLOT "$A000"
-.ORG $020B
-.db "PRACTICE ROM V1.03         "
-
 .BANK 0 SLOT "$8000"
 
 .ORG $0314
@@ -286,6 +276,57 @@ _insert06:
 	STA $2007
 	+
 	RTS
+
+
+.BANK $03 SLOT "$A000"
+
+.ORG $0C21
+_insert_b03_00:
+	JSR $9880
+	
+.ORG $0D88
+insert_b03_01:
+	NOP
+	NOP
+	NOP
+
+.ORG $1641
+insert_b03_02:
+	JSR $BFC0
+	JMP $B64C
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	
+.ORG $1FC0
+insert_b03_03:
+	LDA $07F8
+	AND #$04
+	BEQ +
+		LDA #$10
+		STA $06E0
+		ORA $7F20,Y
+		STA $7F20,Y
+	+
+	RTS
+
+
+.BANK $04 SLOT "$A000"
+
+	
+	
+; Map Data
+.BANK $0C SLOT "$A000"
+.ORG $0000
+.INCBIN "src\bank0C_mapdata.bin"
+
+
+; Title Screen Version
+.BANK $1D SLOT "$A000"
+.ORG $020B
+.db "PRACTICE ROM V1.03"
 
 .BANK $1E SLOT "$8000"
 
