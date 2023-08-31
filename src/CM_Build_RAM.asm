@@ -82,5 +82,8 @@ Square1SoundQueue = $7804
 MinimapFlags = $7A00
 MinimapTiles = $7B00
 
+DrawMapFlags = $7C07
+DrawMapRowCounter = $7C08
+
 MaxDashesCount = $7F03
 SpawnSwitchStatus = $7F16

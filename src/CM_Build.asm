@@ -31,17 +31,20 @@ BANKS      48
 
 
 .ORG $0357
-_insert00:	
+_insert_b00_00:	
 	JSR $918C
 
 
 .ORG $04A6
-_insert01:
+_insert_b00_01:
 	JMP $9181
   LDY #$00
 	
+.ORG $0520
+	MapWarp:
+	
 .ORG $0519
-_insert02:
+_insert_b00_02:
 	CMP #$00
 	BEQ $0053
 	STX $07FD
@@ -81,7 +84,7 @@ _insert02:
   JMP InputViewer
 	
 .ORG $1180
-_insert03:
+_insert_b00_03:
 	RTS
 	LDA $07FA
 	BNE +
@@ -124,7 +127,7 @@ PPUReturn:
     CMP #$0B
 		
 .ORG $17BF
-_insert04:
+_insert_b00_04:
 	TAX
 	AND #$0F
 	STA $07FE
@@ -152,7 +155,7 @@ StartPressed:
 	NOP
 
 .ORG $192E
-_insert05:
+_insert_b00_05:
 	JMP $9FB0
 	
 ;.ORG $1DA0
@@ -169,7 +172,7 @@ CheckSelect:
     LDA $07F8
     EOR #$08
     BEQ -
-    JMP $1fff   ; Jump To SelectWarp
+    ;JMP $1fff   ; Jump To SelectWarp
 
 .ORG $1F20
 
@@ -196,6 +199,12 @@ InputViewer:
     LDA #Right_Dir
     JSR InputPPUWrite
     JMP CheckSelect
+		NOP
+		NOP
+		NOP
+		NOP
+		NOP
+		NOP
 InputPPUWrite:
     STX PpuAddr_2006
     STY PpuAddr_2006
@@ -207,76 +216,88 @@ InputPPUWrite:
 +
     STY PpuData_2007
     RTS
+		
+__WTF:
+	JSR $068D
+  JSR $00A9
+  STA PpuAddr_2006
+  LDA #$42
+  STA PpuData_2007
+  RTS
+
 
 .ORG $1F7B
 DrawHUDValues:
-    STX PpuAddr_2006
-    LDY #$12
-    STY PpuAddr_2006
-    LDA #$9E
-    STA PpuData_2007
-    LDA XSpeed
-    TAX
-    AND #$80
-    BEQ +
-    LDA #$01
-    SBC XSpeed
-    TAX
-    +
-    STX PpuData_2007
-    LDA #$9F
-    STA PpuData_2007
-    LDA YSpeed
-    TAX
-    AND #$80
-    BEQ +
-    LDA #$01
-    SBC YSpeed
-    TAX
-    +
-    STX PpuData_2007
-    LDY #$24
-    JMP PPUReturn
-		
-.ORG $1FB0
-_insert06:
-	STA $36
-	LDA #$00
-	STA $77EE
-	STA $77EF
-	RTS
-	LDY #$00
-	LDA $0751
-	;BNE $A7
-	.DB $D0,$95 ; BNE $95
-	LDA $07FC
-	.DB $F0,$90 ; BEQ $90
-	;BEQ $A7
-	STA $057F
-	INC $04BD
-	LDA $07FD
-	STA $02
-	JMP $8520
-	LDA $07FB
-	STA $057F
-	JMP $830F
-	BRK
-	;hey
-	LDA ($02),Y
-	INC $03
-	RTS
-	LDA $07FA
-	BEQ +
-	LDX #$22
-	STX $2006
-	LDX #$4D
-	STX $2006
-	LDA $057F
-	ADC #$30
-	STA $2007
+  STX PpuAddr_2006
+  LDY #$12
+  STY PpuAddr_2006
+  LDA #$9E
+  STA PpuData_2007
+  LDA $50
+  TAX
+  AND #$80
+  BEQ +
+		LDA #$01
+		SBC $50
+		TAX
 	+
-	RTS
-
+  STX PpuData_2007
+  LDA #$9F
+  STA PpuData_2007
+  LDA $8F
+  TAX
+  AND #$80
+  BEQ +
+		LDA #$01
+		SBC $8F
+		TAX
+	+
+  STX PpuData_2007
+  LDY #$24
+  JMP $91D1
+	
+ResetTimer:
+  STA $36
+  LDA #$00
+  STA $77EE
+  STA $77EF
+  RTS
+	
+SelectWarp:
+  LDY #$00
+  LDA SpawnTypeUsed
+  BNE DrawHUDValues
+  LDA WarpWorldLast
+  BEQ DrawHUDValues
+  STA WorldNumber
+  INC IsInMap
+  LDA WarpIDLast
+  STA TempRoomID
+  JMP MapWarp
+	
+MapWarpRest:
+  LDA TempWorldNumber
+  STA WorldNumber
+  JMP $830F
+  BRK ; WHY IS THIS A 2 BYTE INSTRUCTION?! WTF WLA?!?!?!?!
+	
+MapGetData:
+  LDA (TempRoomID),Y
+  INC $03
+  RTS
+	
+ReDrawWorldNumberOnMenuExit:
+  LDA IsOnMapMenu
+  BEQ +
+		LDX #$22
+		STX PpuAddr_2006
+		LDX #$4D
+		STX PpuAddr_2006
+		LDA WorldNumber
+		ADC #$30
+		STA PpuData_2007
+	+
+  RTS
 
 .BANK $03 SLOT "$A000"
 
@@ -285,13 +306,13 @@ _insert_b03_00:
 	JSR $9880
 	
 .ORG $0D88
-insert_b03_01:
+_insert_b03_01:
 	NOP
 	NOP
 	NOP
 
 .ORG $1641
-insert_b03_02:
+_insert_b03_02:
 	JSR $BFC0
 	JMP $B64C
 	NOP
@@ -301,7 +322,7 @@ insert_b03_02:
 	NOP
 	
 .ORG $1FC0
-insert_b03_03:
+_insert_b03_03:
 	LDA $07F8
 	AND #$04
 	BEQ +
@@ -315,6 +336,106 @@ insert_b03_03:
 
 .BANK $04 SLOT "$A000"
 
+.ORG $112C
+_insert_b04_00:
+.DB $04,$02
+
+.ORG $182C
+_insert_b04_01:
+	NOP
+	NOP
+	
+.ORG $1845
+_insert_b04_02:
+	NOP
+	NOP
+	NOP
+	NOP
+	JSR $98A0
+	
+.ORG $1880
+_insert_b04_03:
+	TAY
+	LDA $07F8
+	AND #$04
+	BEQ +
+	TYA
+	STA $7F20,X
+	+
+	RTS
+
+.ORG $18A0
+_insert_b04_04:
+	LDA $07F8
+	AND #$02
+	BEQ +
+		LDA $7F0D
+		CLC
+		ADC $9876,Y
+	RTS
+	+
+	LDA $7F0D
+	RTS
+	
+.BANK $05 SLOT "$A000"
+.ORG $10C2
+_insert_b05_00:
+	NOP
+  JSR $B8B0
+	
+.ORG $18B0
+_insert_b05_01:
+	LDA #$64
+	INC $77EF
+	CMP $77EF
+	BNE +
+		INC $77EE
+		LDA #$00
+		STA $77EF
+	+
+	LDA $77EF
+	STA $7F07
+	LDA $77EE
+	STA $7F06
+	LDA $0E
+	CMP #$07
+	RTS
+	
+.BANK $09 SLOT "$A000"
+.ORG $04DD
+_insert_b09_00:
+	JSR $BFE0
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	
+.ORG $1FE0
+_insert_b09_01:
+	LDA $07F8
+	AND #$04
+	BEQ +
+		LDA #$10
+		ORA $7F20,X
+		STA $7F20,X
+	+
+	RTS
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
 	
 	
 ; Map Data
@@ -323,10 +444,184 @@ insert_b03_03:
 .INCBIN "src\bank0C_mapdata.bin"
 
 
+.BANK $0D SLOT "$A000"
+.ORG $0EB2
+_insert_b0D_00:
+	JMP $B760
+	CLC
+	JMP $B880
+	NOP
+	
+.ORG $0ECE
+_insert_b0D_01:
+	CPY #$60
+	
+.ORG $0EE3
+_insert_b0D_02:
+	LDA #$AA
+	STA $5105
+	LDA $0742
+	AND #$FB
+	STA $2000
+	LDA #$23
+	STA $2006
+	LDA #$D0
+	STA $2006
+	LDY #$00
+	LDA #$AA
+	-
+		STA $2007
+		INY
+		CPY #$28
+	BNE -
+	INC $7C07
+	RTS
+	
+; Uh data i guess?
+.DB $4C,$00,$B8,$8A, $89,$8B,$89,$8C
+.DB $8D,$85,$86,$89, $8E,$8F,$00,$84
+.DB $85,$86,$87,$88, $89,$9C,$94,$85
+.DB $95,$96,$97,$98, $00,$00,$00,$00
+.DB $00,$00,$00,$00, $00,$00,$00,$00
+.DB $00,$00,$00,$00, $00,$00,$00,$00
+
+.ORG $0F65
+_insert_b0D_03:
+	JMP $B780
+	
+.ORG $0FD6
+_insert_b0D_04:
+	JMP DrawXYOnMapEndLoad
+	RTS
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+
+.ORG $166B
+insert_b0D_05:
+	LDA #$08
+  STA $2001
+
+.ORG $1760
+insert_b0D_06:
+  LDA IsOnMapMenu
+  BNE +
+		-
+		LDA DrawMapRowCounter
+		JMP $AEB5
+	+
+  LDA #$FC
+  ADC DrawMapRowCounter
+  BMI -
+  JMP $AEDA
+  NOP
+  NOP
+  NOP
+  NOP
+  NOP
+  NOP
+  NOP
+  NOP
+  NOP
+  NOP
+.DB $00;BRK
+	
+DontDrawOnMenuRows:
+  LDA DrawMapRowCounter
+  CMP #$07
+  BEQ ++
+  CMP #$06
+  BEQ ++
+  CMP #$05
+  BEQ ++
+  LDA IsOnMapMenu
+  BEQ +
+		LDA DrawMapRowCounter
+		JMP $AF68
+	+
+  LDA DrawMapRowCounter
+	++
+  JMP $AF8D
+
+.DB $00,$00,$00,$00, $00,$00,$00,$00
+.DB $00,$00,$00,$00, $00,$00,$00,$00
+.DB $00,$00,$00,$00, $00,$00,$00,$00
+.DB $00,$00,$00,$00, $00,$00,$00,$00
+	
+	
+DrawXYOnMapEndLoad:
+  LDA #$00
+  STA DrawMapFlags
+  LDA #$01
+  STA IsInMap
+  NOP
+  NOP
+  NOP
+  RTS
+	
+.ORG $1800
+_CH_MapTheFuckinDraw:
+	LDA #$20
+  STA PpuAddr_2006
+  LDA #$A2
+  STA PpuAddr_2006
+  LDX #$00
+	-
+		LDA $AF0D,X
+		BEQ +
+		STA PpuData_2007
+		INX
+  BNE -
+	+
+  LDA #$20
+  STA PpuAddr_2006
+  LDA #$C2
+  STA PpuAddr_2006
+  LDX #$00
+	-
+		LDA $AF19,X
+		BEQ +
+		STA PpuData_2007
+		INX
+		BNE -
+	+
+  LDX #$20
+  STX PpuAddr_2006
+  LDX #$D6
+  STX PpuAddr_2006
+  LDX #$9D
+  STX PpuData_2007
+  STA PpuData_2007
+  STA PpuData_2007
+  LDX #$9E
+  STX PpuData_2007
+  STA PpuData_2007
+  STA PpuData_2007
+  LDX #$9F
+  STX PpuData_2007
+  STA PpuData_2007
+  INC DrawMapFlags
+  RTS
+
+.ORG $1880
+_CH_MapDrawData_OrSomeShit:
+.DB $0A,$A8,$B9,$9E, $B8,$8D,$06,$20
+.DB $C8,$B9,$9E,$B8, $8D,$06,$20,$4C
+.DB $C7,$AE,$00,$00, $00,$00,$00,$00
+.DB $00,$00,$00,$00, $00,$00,$00,$00
+.DB $21,$00,$21,$60, $21,$C0,$22,$20
+.DB $22,$80,$22,$E0, $22,$E0,$00,$00
+
+
 ; Title Screen Version
 .BANK $1D SLOT "$A000"
 .ORG $020B
 .db "PRACTICE ROM V1.03"
+
 
 .BANK $1E SLOT "$8000"
 
