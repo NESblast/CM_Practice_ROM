@@ -1,16 +1,18 @@
 ; NES Ram Vars
 .BANK 0 SLOT "RAM_NES"
 
-Temp_Var1 = $00
+Temp_Var0 = $00
 TempAddr = $00
-Temp_Var2 = $01
-Temp_Var3 = $02
+Temp_Var1 = $01
+Temp_Var2 = $02
 TempRoomID = $02
-Temp_Var4 = $03
-Temp_Var5 = $04
-Temp_Var6 = $05
-Temp_Var7 = $06
-Temp_Var8 = $07
+Temp_Var3 = $03
+TempAddr3 = $03
+Temp_Var4 = $04
+Temp_Var5 = $05
+Temp_Var6 = $06
+Temp_Var7 = $07
+TempAddrA = $0A
 
 
 PlayerState = $0E		          ;If this value is equal to 8, the player can control Mario.
@@ -35,7 +37,9 @@ YSubspeed	 = $03EB	            ;Mario’s vertical acceleration.
 XSubpixel	 = $03C1	            ;The horizontal subpixel that Mario is at. Though there is no visible difference, a higher value means further to the right.
 YSubpixel = $03D6	              ;Mario’s vertical subpixel
 
-IsInMap = $04BD   
+IsInMap = $04BD 
+
+DeathTimer = $04C2  
 
 SpeedBoostBonus	 = $052B	      ;If this value is 16, then speed boost is active
 SpeedBoostTimer = $052C		      ;In order for the speed boost to activate, this timer must count up to 96.
@@ -87,3 +91,6 @@ DrawMapRowCounter = $7C08
 
 MaxDashesCount = $7F03
 SpawnSwitchStatus = $7F16
+DashAbility = $7F2A
+WalljumpAbility = $7F2F
+InventoryItem = $7FFA

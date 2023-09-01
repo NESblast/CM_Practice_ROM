@@ -3,8 +3,8 @@ SLOTSIZE   $2000
 DEFAULTSLOT   0
 SLOT 0      $8000       "$8000"
 SLOT 1      $A000       "$A000"
-SLOT 2      $C000       
-SLOT 3      $E000
+SLOT 2      $C000       ; Don't Use!!! SFX!!!
+SLOT 3      $E000				"$E000"
 SLOT 4 		  $0000		"RAM_NES"
 SLOT 5 	    $6000		"RAM_CART"
 .ENDME
@@ -617,10 +617,69 @@ _CH_MapDrawData_OrSomeShit:
 .DB $22,$80,$22,$E0, $22,$E0,$00,$00
 
 
+.BANK $0E SLOT "$A000"
+
+.ORG $0B04
+insert_b0E_00:
+.DB $67,$20,$72 ; A text fix? huh?
+
+.ORG $1B04
+insert_b0e_01:
+.DB $C9,$00,$EA ; A text fix? huh?
+
+
+.BANK $10 SLOT "$A000"
+
+.ORG $0042
+insert_b10_00:
+.DB $01,$D5,$D0 ; Graphics?
+
+
+.ORG $01BA
+insert_b10_01:
+.DB $01,$9C ; Graphics?
+
+.ORG $01F7
+insert_b10_02:
+.DB $01,$D0 ; Graphics?
+
+.ORG $0295
+insert_b10_03:
+.DB $38,$C1 ; Graphics?
+
+.ORG $0495
+insert_b10_04:
+.DB $01,$C7 ; Graphics?
+
+.ORG $0805
+insert_b10_05:
+.DB $01,$41 ; Graphics?
+
+.ORG $0C9A
+insert_b10_06:
+.DB $01,$87 ; Graphics?
+
+
+.BANK $11 SLOT "$A000"
+
+.ORG $05B1
+insert_b11_00:
+.DB $02,$A8 ; Graphics?
+
+.ORG $14D8
+insert_b11_01:
+.DB $02,$AE ; Graphics?
+
+.ORG $154E
+insert_b11_02:
+.DB $02,$90 ; Graphics?
+
+
 ; Title Screen Version
 .BANK $1D SLOT "$A000"
 .ORG $020B
-.db "PRACTICE ROM V1.03"
+.DB "PRACTICE HACK v1.03"
+.DB $00,$00,$00,$00, $00,$00,$00,$00
 
 
 .BANK $1E SLOT "$8000"
@@ -632,34 +691,41 @@ _CH_MapDrawData_OrSomeShit:
 .ORG $0B49
 BEQMapRoutine:
   JMP MapRoutine
+	NOP
+	NOP
 
 .ORG $0E90
   LDA $0590 ; scanline counter
   CMP #$03
   BEQ +
+		; waste cycles for raster
+		;PHP
+		;PLP
+		;NOP
+		NOP
+		NOP
+		NOP
+		NOP
+		NOP
 
-  ; waste cycles for raster
-  PHP
-  PLP
-  NOP
-
-  LDY #$30
-  STY $5128
-  INY
-  STY $5129
-  LDA #$D8
-  STA $5203 ; scanline for next IRQ
-  INC $0590
-  RTS
-+
+		LDY #$30
+		STY $5128
+		INY
+		STY $5129
+		LDA #$D8
+		STA $5203 ; scanline for next IRQ
+		INC $0590
+		RTS
+	+
+	
   LDY #$00
   STY PPU_MASK
   RTS
 
 .ORG $1120
 MapRoutine:
-  ; LDA #%00011000
-  ; STA PPUMaskVar
+  LDA #%00011000
+  STA PPUMaskVar
 
   LDA IsInMap
   AND #%10000000
@@ -668,16 +734,86 @@ MapRoutine:
   JSR MapMenuToggle
   LDX IsOnMapMenu
   BEQ +
-
-  JSR MenuRoutine
-  JSR GoThroughSettings
-  LDA #$00
-+
+		JSR MenuRoutine
+		JSR GoThroughSettings
+		LDA #$00
+	+
   JMP UpdateXYMapTiles
   LDA #$00
 JumpBackFromMapRoutine:
   JMP $8B4E
+	
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
 
+UpdateXYMapTiles:
+  LDA #$B0
+  STA PpuControl_2000
+  LDA #$20
+  STA PpuAddr_2006
+  LDA #$D7
+  STA PpuAddr_2006
+  LDA TempWorldNumber
+  ADC #$01
+  STA PpuData_2007
+  LDA #$20
+  STA PpuAddr_2006
+  LDA #$DA
+  STA PpuAddr_2006
+  LDA MapCursorX
+  STA PpuData_2007
+  LDA #$20
+  STA PpuAddr_2006
+  LDA #$DD
+  STA PpuAddr_2006
+  LDA MapCursorY
+  ADC #$02
+  STA PpuData_2007
+  JMP $8B51
+	
+	; Free
+.DB $00,$00,$00,$00, $00,$00,$00,$00
+.DB $00,$00,$00,$00, $00,$00,$00,$00
+.DB $00,$00,$00,$00, $00,$00,$00,$00
+.DB $00
+ 
+GoThroughSettings:
+  LDA MenuSelector
+  ASL A ; times two
+  TAY
+
+  LDA MenuSettingsAddr,Y
+  STA TempAddr3+1
+  INY
+  LDA MenuSettingsAddr,Y
+  STA TempAddr3
+
+  JMP (TempAddr3)	
+	RTS
+	
+.ORG $11C0
+_CH_garbage0:
+	PHA
+  PLA
+  PHA
+  PLA
+.DB $AD
+
+
+.ORG $11F0
+_CH_notSure0:
+.DB $AD,$F7,$07,$D0, $08,$A9,$AA,$8D
+.DB $05,$51,$4C,$52, $8E,$A9,$00,$8D
+	
+	
+.ORG $1314
 MapMenuToggle:
   LDA Input
   AND #Select_Button
@@ -690,32 +826,8 @@ MapMenuToggle:
   JSR MenuIsToggling
 +
   RTS
-
-MenuIsToggling:
-  LDA #Sfx_EnemySmack
-  STA Square1SoundQueue
-  LDA IsOnMapMenu
-  ;BEQ +
-  JSR UpdateMenuTexts
-;+
-  ;JMP DrawAllMenuValues
-
-
-GoThroughSettings:
-  LDA MenuSelector
-  ASL A ; times two
-  TAY
-
-  LDA MenuSettingsAddr,Y
-  STA TempAddr
-  INY
-  LDA MenuSettingsAddr,Y
-  STA TempAddr+1
-
-  JMP (TempAddr)
-
-MenuSettingsAddr:
-	.word CheckToChangeMapWorld
+	NOP
+	NOP
 
 CheckToChangeMapWorld:
   LDX TempWorldNumber
@@ -742,7 +854,7 @@ CheckToChangeMapWorld:
 ++
   STX TempWorldNumber
   CLC
-  ;JSR DrawWorldValue
+  JSR DrawWorldValue
   INC PPUIOStep
   LDA #$00
   STA PPU_MASK
@@ -759,174 +871,40 @@ CheckToChangeMapWorld:
   JSR PlaySwooshSFX
 +++
   RTS
-
-
-UpdateXYMapTiles:
-  LDA #$B0
-  STA PpuControl_2000
-  LDA #$20
-  STA PpuAddr_2006
-  LDA #$D7
-  STA PpuAddr_2006
-  LDA TempWorldNumber
-  ADC #$01
-  STA PpuData_2007
-  LDA #$20
-  STA PpuAddr_2006
-  LDA #$DA
-  STA PpuAddr_2006
-  LDA MapCursorX
-  STA PpuData_2007
-  LDA #$20
-  STA PpuAddr_2006
-  LDA #$DD
-  STA PpuAddr_2006
-  LDA MapCursorY
-  ADC #$02
-  STA PpuData_2007
-  JMP $8B51
-
-.ORG $15C0
-MenuRoutine:
-  LDA Input
-  AND #Up_Dir
-  BEQ +++
-  AND DelayedInput
-  BNE +++
-
-; play stomp SFX
-  LDX #Sfx_StompSQ
-  STX Square1SoundQueue
-
-  DEC MenuSelector
-  BPL ++
-  LDA #$07
-  STA MenuSelector
-  JMP ++
-+++:
-  LDA Input
-  AND #Down_Dir
-  BEQ ++
-  AND DelayedInput
-  BNE ++
-
-; play stomp SFX
-  LDX #Sfx_StompSQ
-  STX Square1SoundQueue
-
-  LDX MenuSelector
-  INX
-  CPX #$08
-  BNE +
-  LDX #$00
-  +
-  STX MenuSelector
-  ++
-  LDA MenuSelector
-  TAY
-  ASL A
-  ASL A
-  ASL A
-  ADC #$7B
-  CPY #$07
-  BNE +
-  SBC #$38
-  STA $0230
-  LDA #$B0
-  STA $0233
+	NOP
+	
+MenuIsToggling:
+  LDA #Sfx_EnemySmack
+  STA Square1SoundQueue
+  LDA IsOnMapMenu
+  BEQ +
+		JSR UpdateMenuTexts
+	+
+  JMP DrawAllMenuValues
+	
+.ORG $139A
+PlaySwooshSFX:
+  LDA #Sfx_StompNOI
+  STA Square1SoundQueue
   RTS
-  +
-  STA $0230
-  LDA #$58
-  STA $0233
-  RTS
+	
+.DB $EA,$EA,$EA,$EA, $EA,$EA,$EA,$EA
+.DB $EA,$EA,$EA,$EA, $EA,$EA,$EA,$EA
+.DB $EA,$EA,$EA,$EA, $EA,$EA,$EA,$EA
+.DB $EA,$EA,$EA,$EA, $EA,$EA,$EA,$EA
+.DB $EA,$EA,$EA,$EA, $EA,$EA,$EA,$EA
+.DB $EA,$EA,$EA,$EA, $EA,$EA,$EA,$EA
+.DB $EA,$EA,$EA,$EA, $EA,$EA,$EA,$EA
+.DB $EA,$EA,$EA,$EA, $EA,$EA,$EA,$EA
 
-UpdateMenuTexts:
-  ;LDA IsOnMapMenu
-  ;BNE +
-  ;RTS
-
-;+
-  LDA #lobyte(MenuTexts)
-  STA TempAddr
-  LDA #hibyte(MenuTexts)
-  STA TempAddr+1
-
-  LDA #$22
-  STA PpuAddr_2006
-  LDA #$46
-  STA PpuAddr_2006
-  LDX #$05
-  JSR DrawLoop
-
-  LDA #$22
-  STA PpuAddr_2006
-  LDA #$65
-  STA PpuAddr_2006
-  LDX #$06
-  JSR DrawLoop
-
-  LDA #$22
-  STA PpuAddr_2006
-  LDA #$84
-  STA PpuAddr_2006
-  LDX #$07
-  JSR DrawLoop
-
-  LDA #$22
-  STA PpuAddr_2006
-  LDA #$A4
-  STA PpuAddr_2006
-  LDX #$07
-  JSR DrawLoop
-
-  LDA #$22
-  STA PpuAddr_2006
-  LDA #$C5
-  STA PpuAddr_2006
-  LDX #$06
-  JSR DrawLoop
-
-  LDA #$22
-  STA PpuAddr_2006
-  LDA #$E1
-  STA PpuAddr_2006
-  LDX #$0A
-  JSR DrawLoop
-
-  LDA #$23
-  STA PpuAddr_2006
-  LDA #$04
-  STA PpuAddr_2006
-  LDX #$07
-  JSR DrawLoop
-
-  LDA #$22
-  STA PpuAddr_2006
-  LDA #$57
-  STA PpuAddr_2006
-  LDX #$08
-  JSR DrawLoop
-  RTS
-
-DrawLoop:
-  LDA (TempAddr),Y
-  STA PpuData_2007
-  INY
-  DEX
-  BNE DrawLoop
-  RTS
-
-MenuTexts:
-.db "World"
-.db "Dashes"
-.db "Collect"
-.db "Display"
-.db "Select"
-.db "Death Warp"
-.db "Respawn"
-.db "Powerups"
-
+.ORG $13E0
+MenuSettingsAddr:
+	.DB $93,$2C,$97,$60, $97,$94,$00,$00
+	.DB $9B,$00,$00,$00, $97,$E0,$99,$40
+	.DB $00,$00,$00,$00, $00,$00,$00,$00
+	.DB $00,$00,$A0,$00, $8C,$43,$07,$60
+	
+.ORG $14AD
 ChangeMapTiles:
   CLC
   ADC #$9F
@@ -1023,6 +1001,177 @@ ChangeMapTiles:
   STA $7B00,Y
   RTS
 
+.ORG $1560
+MenuTexts:
+.DB "World"
+.DB "Dashes"
+.DB "Collect"
+.DB "Display"
+.DB "Select"
+.DB "Death"
+.DB $00 
+.DB "Warp"
+.DB "Respawn"
+.DB "Powerups"
+
+.ORG $15C0
+MenuRoutine:
+  LDA Input
+  AND #Up_Dir
+  BEQ +++
+  AND DelayedInput
+  BNE +++
+
+; play stomp SFX
+  LDX #Sfx_StompSQ
+  STX Square1SoundQueue
+
+  DEC MenuSelector
+  BPL ++
+  LDA #$07
+  STA MenuSelector
+  JMP ++
+	+++
+  LDA Input
+  AND #Down_Dir
+  BEQ ++
+  AND DelayedInput
+  BNE ++
+
+; play stomp SFX
+  LDX #Sfx_StompSQ
+  STX Square1SoundQueue
+
+  LDX MenuSelector
+  INX
+  CPX #$08
+  BNE +
+  LDX #$00
+  +
+  STX MenuSelector
+  ++
+  LDA MenuSelector
+  TAY
+  ASL A
+  ASL A
+  ASL A
+  ADC #$7B
+  CPY #$07
+  BNE +
+  SBC #$38
+  STA $0230
+  LDA #$B0
+  STA $0233
+  RTS
+  +
+  STA $0230
+  LDA #$58
+  STA $0233
+  RTS
+
+.ORG $1640
+UpdateMenuTexts:
+  LDA IsOnMapMenu
+  BNE +
+		RTS
+	+
+  LDA #$60
+  STA TempAddrA
+  LDA #$95
+  STA TempAddrA+1
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$46
+  STA PpuAddr_2006
+  LDX #$05
+	-
+  LDA (TempAddrA),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$65
+  STA PpuAddr_2006
+  LDX #$06
+	-
+  LDA (TempAddrA),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$84
+  STA PpuAddr_2006
+  LDX #$07
+	-
+  LDA (TempAddrA),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$A4
+  STA PpuAddr_2006
+  LDX #$07
+	-
+  LDA (TempAddrA),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$C5
+  STA PpuAddr_2006
+  LDX #$06
+	-
+  LDA (TempAddrA),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$E1
+  STA PpuAddr_2006
+  LDX #$0A
+	-
+  LDA (TempAddrA),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+  LDA #$23
+  STA PpuAddr_2006
+  LDA #$04
+  STA PpuAddr_2006
+  LDX #$07
+	-
+  LDA (TempAddrA),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$57
+  STA PpuAddr_2006
+  LDX #$08
+	-
+  LDA (TempAddrA),Y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+  RTS
+  NOP
+  NOP
+
+.ORG $1760
 CheckToChangeMaxDashes:
   LDX MaxDashesCount
   LDA Input
@@ -1047,7 +1196,7 @@ CheckToChangeMaxDashes:
   LDX #$07
 ++: ; do stuff
   STX MaxDashesCount
-  ; JSR DrawDashesValue
+  JSR DrawDashesValue
   ; JSR $9390
   JSR PlaySwooshSFX
 +++: ; end
@@ -1087,16 +1236,361 @@ UpdateMenuCollect:
   AND #$F9
   ADC PracticeFlags
   STA PracticeFlags
-  ; JSR DrawCollectValues
+  JSR DrawCollectValues
   JSR PlaySwooshSFX
 SkipUpdateMenuCollect:
   LDX #$00
   RTS
-
-PlaySwooshSFX:
-  LDA #Sfx_StompNOI
-  STA Square1SoundQueue
+	
+.ORG $17E0
+CheckToChangeRespawnType:
+  LDA Input
+  AND #$01
+  BEQ +
+  AND DelayedInput
+  BNE +
+  LDA PracticeFlags
+  EOR #$01
+  JMP ++
+	+
+  LDA Input
+  AND #$02
+  BEQ +
+  AND DelayedInput
+  BNE +
+	++
+  LDA PracticeFlags
+  EOR #$01
+  STA PracticeFlags
+  JSR DrawRespawnValue
+  JSR PlaySwooshSFX
+	+
+  LDX #$00
   RTS
+
+	
+.ORG $1820
+DrawCollectValues:
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$8D
+  STA PpuAddr_2006
+  LDA PracticeFlags
+  TAX
+  AND #$02
+  BEQ +
+  LDA #$82
+  JMP ++
+	+
+  LDA #$80
+	++
+  STA PpuData_2007
+  TXA
+  AND #$04
+  BEQ +
+  LDA #$81
+  JMP ++
+	+
+  LDA #$80
+  ++
+	STA PpuData_2007
+  RTS
+
+	
+.ORG $1860
+DrawWorldValue:
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$4D
+  STA PpuAddr_2006
+  LDA TempWorldNumber
+  ADC #$30
+  STA PpuData_2007
+  RTS
+	
+.ORG $1880
+DrawDashesValue:
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$6D
+  STA PpuAddr_2006
+  CLC
+  LDA MaxDashesCount
+  ADC #$30
+  STA PpuData_2007
+  RTS
+	
+.ORG $18A0
+DrawRespawnValue:
+  LDA #$23
+  STA PpuAddr_2006
+  LDA #$0D
+  STA PpuAddr_2006
+  LDA PracticeFlags
+  AND #$01
+  BNE +
+		LDA #$53
+		STA PpuData_2007
+		LDA #$6C
+		STA PpuData_2007
+		LDA #$6F
+		STA PpuData_2007
+		LDA #$77
+		STA PpuData_2007
+		RTS
+	+
+  LDA #$46
+  STA PpuData_2007
+  LDA #$61
+  STA PpuData_2007
+  LDA #$73
+  STA PpuData_2007
+  LDA #$74
+  STA PpuData_2007
+  RTS
+
+	
+.ORG $1900
+DrawAllMenuValues:
+  JSR DrawWorldValue
+  JSR DrawDashesValue
+  JSR DrawCollectValues
+  JSR DrawSelectType
+  JSR DrawRespawnValue
+  JSR DrawAbilities
+  JMP $8B51
+	
+.ORG $1940
+CheckToChangeAbilities:
+  LDA #$00
+  LDX WalljumpAbility
+  BEQ +
+		ADC #$01 ; PROB: WHAT IS THE CARRY FLAG?!
+	+
+  LDX DashAbility
+  BEQ +
+		ADC #$02
+	+
+  LDX InventoryItem
+  BEQ +
+		ADC #$04
+	+
+  TAX
+  LDA Input
+  AND #$01
+  BEQ +
+  AND DelayedInput
+  BNE +
+  INX
+  CPX #$08
+  BNE ++
+  LDX #$00
+  JMP ++
+	+
+  LDA Input
+  AND #$02
+  BEQ +++
+  AND DelayedInput
+  BNE +++
+  DEX
+  BPL ++
+  LDX #$07
+	++
+  TXA
+  AND #$01
+  BEQ +
+		LDA #$02
+	+
+  STA WalljumpAbility
+  TXA
+  AND #$02
+  STA DashAbility
+  TXA
+  AND #$04
+  BEQ +
+		LDA #$03
+	+
+  STA InventoryItem
+  JSR DrawAbilities
+  JSR PlaySwooshSFX
+	+++
+  LDX #$00
+  RTS
+
+	
+.ORG $19C0
+DrawAbilities:
+  LDX #$00
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$97
+  STA PpuAddr_2006
+  LDA WalljumpAbility
+  BNE +
+  LDA #$90
+  STA PpuData_2007
+  LDA #$91
+  STA PpuData_2007
+  JMP ++
+	+
+  LDA #$83
+  STA PpuData_2007
+  LDA #$84
+  STA PpuData_2007
+	++
+  STX PpuData_2007
+  LDA DashAbility
+  BNE +
+  LDA #$90
+  STA PpuData_2007
+  LDA #$91
+  STA PpuData_2007
+  JMP ++
+	+
+  LDA #$87
+  STA PpuData_2007
+  LDA #$88
+  STA PpuData_2007
+	++
+  STX PpuData_2007
+  LDA InventoryItem
+  BNE +
+  LDA #$90
+  STA PpuData_2007
+  LDA #$91
+  STA PpuData_2007
+  JMP ++
+	+
+  LDA #$8B
+  STA PpuData_2007
+  LDA #$8C
+  STA PpuData_2007
+	++
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$B7
+  STA PpuAddr_2006
+  LDA WalljumpAbility
+  BNE +
+  LDA #$A0
+  STA PpuData_2007
+  LDA #$A1
+  STA PpuData_2007
+  JMP ++
+	+
+  LDA #$85
+  STA PpuData_2007
+  LDA #$86
+  STA PpuData_2007
+	++
+  STX PpuData_2007
+  LDA DashAbility
+  BNE +
+  LDA #$A0
+  STA PpuData_2007
+  LDA #$A1
+  STA PpuData_2007
+  JMP ++
+	+
+  LDA #$89
+  STA PpuData_2007
+  LDA #$8A
+  STA PpuData_2007
+	++
+  STX PpuData_2007
+  LDA InventoryItem
+  BNE +
+  LDA #$A0
+  STA PpuData_2007
+  LDA #$A1
+  STA PpuData_2007
+  JMP ++
+	+
+  LDA #$8D
+  STA PpuData_2007
+  LDA #$8E
+  STA PpuData_2007
+	++
+  RTS
+
+	
+.ORG $1AA0
+DrawSelectType:
+  LDA #$22
+  STA PpuAddr_2006
+  LDA #$CD
+  STA PpuAddr_2006
+  LDA PracticeFlags
+  AND #$08
+  BNE +
+		LDA #$57
+		STA PpuData_2007
+		LDA #$61
+		STA PpuData_2007
+		LDA #$72
+		STA PpuData_2007
+		LDA #$70
+		STA PpuData_2007
+		LDA #$73
+		STA PpuData_2007
+		RTS
+	+
+  LDA #$58
+  STA PpuData_2007
+  LDA #$52
+  STA PpuData_2007
+  LDA #$61
+  STA PpuData_2007
+  LDA #$79
+  STA PpuData_2007
+  LDA #$73
+  STA PpuData_2007
+  RTS
+	
+	
+.ORG $1B00
+CheckToChangeSelectType:
+  LDA Input
+  AND #$01
+  BEQ +
+  AND DelayedInput
+  BNE +
+  JMP ++
+	+
+  LDA Input
+  AND #$02
+  BEQ +
+  AND DelayedInput
+  BNE +
+	++
+  LDA PracticeFlags
+  EOR #$08
+  STA PracticeFlags
+  JSR DrawSelectType
+  JSR PlaySwooshSFX
+	+
+  LDX #$00
+  RTS
+	
+	
+.BANK $1F SLOT "$E000"
+
+.ORG $1CC0
+CheckIfFastRespawn:
+  TAY
+  LDA PracticeFlags
+  AND #$01
+  BNE +
+  LDA #$FF
+  STA DeathTimer
+  TYA
+  RTS
+	+
+	LDA #$E1
+  STA DeathTimer
+  TYA
+	RTS
+
 
 	
 
