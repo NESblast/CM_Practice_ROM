@@ -9,8 +9,6 @@ SLOT 4 		  $0000		"RAM_NES"
 SLOT 5 	    $6000		"RAM_CART"
 .ENDME
 
-; %vbindiff% CMZND_~2.nes CM_BUI~1.nes
-
 .ROMBANKMAP
 BANKSTOTAL   48
 BANKSIZE   $2000
@@ -175,52 +173,45 @@ CheckSelect:
 .ORG $1F20
 
 InputViewer:
-    LDA #$80
-    STA PpuControl_2000
-    LDX #$20
-    LDY #$03
-    LDA #Up_Dir
-    JSR InputPPUWrite
-    LDY #$04
-    LDA #B_Button
-    JSR InputPPUWrite
-    LDY #$05
-    LDA #A_Button
-    JSR InputPPUWrite
-    LDY #$22
-    LDA #Left_Dir
-    JSR InputPPUWrite
-    LDY #$23
-    LDA #Down_Dir
-    JSR InputPPUWrite
-    LDY #$24
-    LDA #Right_Dir
-    JSR InputPPUWrite
-    JMP CheckSelect
-		NOP
-		NOP
-		NOP
-		NOP
-		NOP
-		NOP
-InputPPUWrite:
-    STX PpuAddr_2006
-    STY PpuAddr_2006
-    AND Input
-    BEQ +
-    TYA
-    ADC #$10
-    TAY
-+
-    STY PpuData_2007
-    RTS
-		
-__WTF:
-	JSR $068D
-  JSR $00A9
-  STA PpuAddr_2006
-  LDA #$42
+  LDA #$80
+  STA PpuControl_2000
+  LDX #$20
+  LDY #$03
+  LDA #$08
+  JSR InputPPUWrite
+  INY
+  LDA #$40
+  JSR InputPPUSkipPointer
+  INY
+  LDA #$80
+  JSR InputPPUSkipPointer
+  LDY #$22
+  LDA #$02
+  JSR InputPPUWrite
+  INY
+  LDA #$04
+  JSR InputPPUSkipPointer
+  INY
+  LDA #$01
+  JSR InputPPUSkipPointer
+SpawnPointActivatePrint:
+  LDA SpawnTilePrint
   STA PpuData_2007
+  LDA #$02
+  STA SpawnTilePrint
+  JMP CheckSelect
+InputPPUWrite:
+  STX PpuAddr_2006
+  STY PpuAddr_2006
+InputPPUSkipPointer:
+  AND Input
+  BEQ +
+  TYA
+  ADC #$10
+  STA PpuData_2007
+  RTS
+	+
+  STY PpuData_2007
   RTS
 
 
@@ -399,7 +390,21 @@ _insert_b05_01:
 	CMP #$07
 	RTS
 	
+.BANK $08 SLOT "$8000"
+
+.ORG $0B8C
+	JSR SpawnTriggerDisplaySet_B08
+
+.ORG $19B0
+SpawnTriggerDisplaySet_B08:
+	STA SpawnX
+	LDA #$12
+	STA SpawnTilePrint
+  RTS
+	
+	
 .BANK $09 SLOT "$A000"
+
 .ORG $04DD
 _insert_b09_00:
 	JSR $BFE0
@@ -678,6 +683,17 @@ insert_b11_02:
 .ORG $020B
 .DB "PRACTICE HACK v1.03"
 .DB $00,$00,$00,$00, $00,$00,$00,$00
+
+.ORG $19CE
+	JSR SpawnTriggerDisplaySet_B1D
+
+.ORG $1FD0
+SpawnTriggerDisplaySet_B1D:
+	STA SpawnX
+	LDA #$12
+	STA SpawnTilePrint
+	LDA SpawnX
+  RTS
 
 
 .BANK $1E SLOT "$8000"
