@@ -81,6 +81,8 @@ PPUIOStep = $1C08 ;Coefficient, usually downcounting
 ; Cartridge Ram Vars
 .BANK 0 SLOT "RAM_CART"
 
+SpawnTilePrint = $77ED
+
 Square1SoundQueue = $7804
 
 MinimapFlags = $7A00
