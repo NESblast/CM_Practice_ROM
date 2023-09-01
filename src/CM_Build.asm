@@ -158,8 +158,6 @@ StartPressed:
 _insert_b00_05:
 	JMP $9FB0
 	
-;.ORG $1DA0
-	
 
 .ORG $1E82
 CheckSelect:
@@ -172,7 +170,7 @@ CheckSelect:
     LDA $07F8
     EOR #$08
     BEQ -
-    ;JMP $1fff   ; Jump To SelectWarp
+    JMP SelectWarp   ; Jump To SelectWarp
 
 .ORG $1F20
 
