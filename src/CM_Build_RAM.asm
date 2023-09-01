@@ -82,6 +82,8 @@ PPUIOStep = $1C08 ;Coefficient, usually downcounting
 .BANK 0 SLOT "RAM_CART"
 
 SpawnTilePrint = $77ED
+FrameTimer_hi	= $77EE
+FrameTimer_lo	= $77EF
 
 Square1SoundQueue = $7804
 
@@ -92,6 +94,9 @@ DrawMapFlags = $7C07
 DrawMapRowCounter = $7C08
 
 MaxDashesCount = $7F03
+
+CoinCount_hi = $7F06
+CoinCount_lo = $7F07
 SpawnSwitchStatus = $7F16
 DashAbility = $7F2A
 WalljumpAbility = $7F2F

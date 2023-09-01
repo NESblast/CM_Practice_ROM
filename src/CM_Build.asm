@@ -245,11 +245,11 @@ DrawHUDValues:
   LDY #$24
   JMP $91D1
 	
-ResetTimer:
-  STA $36
+FrameTimerReset:
+  STA $36 ; Replaced
   LDA #$00
-  STA $77EE
-  STA $77EF
+  STA FrameTimer_hi
+  STA FrameTimer_lo
   RTS
 	
 SelectWarp:
@@ -368,27 +368,34 @@ _insert_b04_04:
 	
 .BANK $05 SLOT "$A000"
 .ORG $10C2
-_insert_b05_00:
+FrameTimerInject:
 	NOP
-  JSR $B8B0
+  JSR FrameTimerIncrement
 	
 .ORG $18B0
-_insert_b05_01:
-	LDA #$64
-	INC $77EF
-	CMP $77EF
-	BNE +
-		INC $77EE
+FrameTimerIncrement:
+	CLC
+	LDA FrameTimer_lo
+	ADC #$01
+	CMP #$64
+	BCC ++
+		LDA FrameTimer_hi
+		ADC #$00;$01 w/c
+		CMP #$64
+		BCC +
+			LDA #$00
+		+
+		STA FrameTimer_hi
 		LDA #$00
-		STA $77EF
-	+
-	LDA $77EF
-	STA $7F07
-	LDA $77EE
-	STA $7F06
-	LDA $0E
-	CMP #$07
+	++
+	STA FrameTimer_lo
+	STA CoinCount_lo
+	LDA FrameTimer_hi
+	STA CoinCount_hi
+	LDA PlayerState ; Replaced
+	CMP #$07 ; Replaced
 	RTS
+
 	
 .BANK $08 SLOT "$8000"
 
