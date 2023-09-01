@@ -30,21 +30,22 @@ BANKS      48
 
 
 .ORG $0357
-_insert_b00_00:	
+PauseExitHandle:	
 	JSR $918C
 
 
 .ORG $04A6
-_insert_b00_01:
+PauseMapCursorHandle:
 	JMP $9181
   LDY #$00
 	
 	
 .ORG $0519
-_insert_b00_02:
+PauseEntryHandle:
 	CMP #$00
 	BEQ $0053
 	STX $07FD
+	
 WarpMap:
 	LDA #$8C
 	STA $5115
@@ -130,7 +131,7 @@ PPUReturn:
 		
 		
 .ORG $17BF
-_insert_b00_04:
+MiniMapHandle:
 	TAX
 	AND #$0F
 	STA $07FE
@@ -160,8 +161,8 @@ BtnStartPressed:
 
 
 .ORG $192E
-_insert_b00_05:
-	JMP $9FB0
+FrameTimerResetInject:
+	JMP FrameTimerReset
 	
 
 .ORG $1E82
@@ -339,7 +340,7 @@ _insert_b03_03:
 
 
 .ORG $112C
-_insert_b04_00:
+RoomAddressStoreChange_CH:
 .DB $04,$02
 
 
@@ -371,7 +372,7 @@ _insert_b04_03:
 
 
 .ORG $18A0
-_insert_b04_04:
+MoonCollectHandle_B04:
 	LDA $07F8
 	AND #$02
 	BEQ +
@@ -437,8 +438,8 @@ SpawnTriggerDisplaySet_B08:
 
 
 .ORG $04DD
-_insert_b09_00:
-	JSR $BFE0
+MoonCollectInject:
+	JSR MoonCollectHandle_B00
 	NOP
 	NOP
 	NOP
@@ -447,7 +448,7 @@ _insert_b09_00:
 	
 	
 .ORG $1FE0
-_insert_b09_01:
+MoonCollectHandle_B00:
 	LDA $07F8
 	AND #$04
 	BEQ +
@@ -485,7 +486,7 @@ _insert_b09_01:
 
 
 .ORG $0EB2
-_insert_b0D_00:
+MapDraw_Insert0_CH:
 	JMP $B760
 	CLC
 	JMP $B880
@@ -493,12 +494,12 @@ _insert_b0D_00:
 	
 	
 .ORG $0ECE
-_insert_b0D_01:
+MapDraw_Insert1_CH:
 	CPY #$60
 	
 	
 .ORG $0EE3
-_insert_b0D_02:
+MapDraw_Insert2_CH:
 	LDA #$AA
 	STA $5105
 	LDA $0742
@@ -527,12 +528,12 @@ _insert_b0D_02:
 .DB $00,$00,$00,$00, $00,$00,$00,$00
 
 .ORG $0F65
-_insert_b0D_03:
+MapDraw_Insert3_CH:
 	JMP $B780
 	
 	
 .ORG $0FD6
-_insert_b0D_04:
+MapDraw_Insert4_CH:
 	JMP MapDrawLoadEndDrawXY
 	RTS
 	NOP
@@ -545,13 +546,13 @@ _insert_b0D_04:
 
 
 .ORG $166B
-insert_b0D_05:
+MapDraw_Insert5_CH:
 	LDA #$08
-  STA $2001
+  STA PpuMask_2001
 
 
 .ORG $1760
-insert_b0D_06:
+MapDraw_Insert6_CH:
   LDA isOnMapMenu
   BNE +
 		-
@@ -666,12 +667,12 @@ MapDrawData_maybe:
 
 
 .ORG $0B04
-insert_b0E_00:
+_insert_b0E_00:
 .DB $67,$20,$72 ; A text fix? huh?
 
 
 .ORG $1B04
-insert_b0e_01:
+_insert_b0e_01:
 .DB $C9,$00,$EA ; A text fix? huh?
 
 
@@ -679,37 +680,37 @@ insert_b0e_01:
 
 
 .ORG $0042
-insert_b10_00:
+_insert_b10_00:
 .DB $01,$D5,$D0 ; Graphics?
 
 
 .ORG $01BA
-insert_b10_01:
+_insert_b10_01:
 .DB $01,$9C ; Graphics?
 
 
 .ORG $01F7
-insert_b10_02:
+_insert_b10_02:
 .DB $01,$D0 ; Graphics?
 
 
 .ORG $0295
-insert_b10_03:
+_insert_b10_03:
 .DB $38,$C1 ; Graphics?
 
 
 .ORG $0495
-insert_b10_04:
+_insert_b10_04:
 .DB $01,$C7 ; Graphics?
 
 
 .ORG $0805
-insert_b10_05:
+_insert_b10_05:
 .DB $01,$41 ; Graphics?
 
 
 .ORG $0C9A
-insert_b10_06:
+_insert_b10_06:
 .DB $01,$87 ; Graphics?
 
 
@@ -717,17 +718,17 @@ insert_b10_06:
 
 
 .ORG $05B1
-insert_b11_00:
+_insert_b11_00:
 .DB $02,$A8 ; Graphics?
 
 
 .ORG $14D8
-insert_b11_01:
+_insert_b11_01:
 .DB $02,$AE ; Graphics?
 
 
 .ORG $154E
-insert_b11_02:
+_insert_b11_02:
 .DB $02,$90 ; Graphics?
 
 
@@ -1450,11 +1451,11 @@ PracticeMenuDrawAll:
 .ORG $1940
 PracticeMenuAbilitiesChange:
   LDA #$00
-  LDX abilityWallJump
+  LDX marioAbilityWallJump
   BEQ +
 		ADC #$01 ; PROB: WHAT IS THE CARRY FLAG?!
 	+
-  LDX abilityDash
+  LDX marioAbilityDash
   BEQ +
 		ADC #$02
 	+
@@ -1488,10 +1489,10 @@ PracticeMenuAbilitiesChange:
   BEQ +
 		LDA #$02
 	+
-  STA abilityWallJump
+  STA marioAbilityWallJump
   TXA
   AND #$02
-  STA abilityDash
+  STA marioAbilityDash
   TXA
   AND #$04
   BEQ +
@@ -1512,7 +1513,7 @@ PracticeMenuAbilityDraw:
   STA PpuAddr_2006
   LDA #$97
   STA PpuAddr_2006
-  LDA abilityWallJump
+  LDA marioAbilityWallJump
   BNE +
   LDA #$90
   STA PpuData_2007
@@ -1526,7 +1527,7 @@ PracticeMenuAbilityDraw:
   STA PpuData_2007
 	++
   STX PpuData_2007
-  LDA abilityDash
+  LDA marioAbilityDash
   BNE +
   LDA #$90
   STA PpuData_2007
@@ -1557,7 +1558,7 @@ PracticeMenuAbilityDraw:
   STA PpuAddr_2006
   LDA #$B7
   STA PpuAddr_2006
-  LDA abilityWallJump
+  LDA marioAbilityWallJump
   BNE +
   LDA #$A0
   STA PpuData_2007
@@ -1571,7 +1572,7 @@ PracticeMenuAbilityDraw:
   STA PpuData_2007
 	++
   STX PpuData_2007
-  LDA abilityDash
+  LDA marioAbilityDash
   BNE +
   LDA #$A0
   STA PpuData_2007
