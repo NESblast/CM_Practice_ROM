@@ -1573,6 +1573,12 @@ CheckToChangeSelectType:
 	
 .BANK $1F SLOT "$E000"
 
+CallFastRespawn:
+.ORG $08FF
+	JSR $FCC0
+	NOP
+	NOP
+
 .ORG $1CC0
 CheckIfFastRespawn:
   TAY
