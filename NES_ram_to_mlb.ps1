@@ -37,6 +37,12 @@ foreach ($line in $content) {
         else {
             $content_after_semicolon = ":"+$content_after_semicolon
         }
+
+        # Fix save ram addresses
+        if($mesen_prefix -eq "NesSaveRam:"){
+            $saveRAM_value = [convert]::ToInt32($content_before_semicolon, 16) % 8192
+            $content_before_semicolon = [convert]::ToString($saveRAM_value, 16)
+        }
         
         $output_file.WriteLine($mesen_prefix+$content_before_semicolon.PadLeft(4, '0')+":"+$content_before_eq+$content_after_semicolon)
 
