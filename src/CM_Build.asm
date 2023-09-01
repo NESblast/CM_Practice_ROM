@@ -17,15 +17,16 @@ BANKS      48
 
 .BACKGROUND "CM_1_0_noheader.nes"
 
-.INCLUDE "NES_labels.asm"
 .INCLUDE "src\CM_Build_Constants.asm"
 .INCLUDE "src\CM_Build_RAM.asm"
 .INCLUDE "src\CM_Graphics.asm"
 
+
 .BANK 0 SLOT "$8000"
 
+
 .ORG $0314
-  JSR StartPressed
+  JSR BtnStartPressed
 
 
 .ORG $0357
@@ -38,14 +39,13 @@ _insert_b00_01:
 	JMP $9181
   LDY #$00
 	
-.ORG $0520
-	MapWarp:
 	
 .ORG $0519
 _insert_b00_02:
 	CMP #$00
 	BEQ $0053
 	STX $07FD
+WarpMap:
 	LDA #$8C
 	STA $5115
 	LDA $07FB
@@ -56,30 +56,32 @@ _insert_b00_02:
 	CLC
 	ADC #$9B
 	STA $03
-	JSR $9FE0
+	JSR WarpMapTableGetByte
 	STA $074D
-	JSR $9FE0
+	JSR WarpMapTableGetByte
 	STA $0753
-	JSR $9FE0
+	JSR WarpMapTableGetByte
 	STA $0758
-	JSR $9FE0
+	JSR WarpMapTableGetByte
 	STA $0759
-	JSR $9FE0
+	JSR WarpMapTableGetByte
 	STA $075A
-	JSR $9FE0
+	JSR WarpMapTableGetByte
 	STA $075C
 	STA $0751
-	JSR $9FE0
+	JSR WarpMapTableGetByte
 	STA $075B
-	JSR $9FE0
+	JSR WarpMapTableGetByte
 	STA $7F16
 	LDA #$0E
 	STA $0E
 	STY $0765
 	JMP $9FD5
 	
+	
 .ORG $1129
   JMP InputViewer
+	
 	
 .ORG $1180
 _insert_b00_03:
@@ -109,6 +111,7 @@ _insert_b00_03:
 	NOP
 	NOP
 
+
 .ORG $11CA
     INX
     SBC #$64
@@ -116,6 +119,7 @@ _insert_b00_03:
     NOP
     NOP
     NOP
+		
 PPUReturn:
     LDY #$20
     STY PpuAddr_2006
@@ -123,6 +127,7 @@ PPUReturn:
     STA PpuAddr_2006
     LDA $0E
     CMP #$0B
+		
 		
 .ORG $17BF
 _insert_b00_04:
@@ -135,22 +140,24 @@ _insert_b00_04:
 	ORA $07FE
 	STA $7B00,Y
 	RTS
-					
+				
+				
 .ORG $17D0
-StartPressed:
-  LDA WorldNumber
-  STA TempWorldNumber
-  LDA IsInMap
+BtnStartPressed:
+  LDA worldNumber
+  STA worldNumber_temp
+  LDA mapIsIn
   AND #%00000001
   BEQ +
-  LDA WorldNumber
+  LDA worldNumber
   JSR $96FD;UpdateMapTiles
-  LDA IsInMap
+  LDA mapIsIn
 +
   RTS
 	NOP
 	NOP
 	NOP
+
 
 .ORG $192E
 _insert_b00_05:
@@ -158,20 +165,20 @@ _insert_b00_05:
 	
 
 .ORG $1E82
-CheckSelect:
+BtnSelectCheck:
     LDA #$20
-    AND Input
+    AND input
     BNE +
     -
-    JMP DrawHUDValues
+    JMP HUDDraw
     +
     LDA $07F8
     EOR #$08
     BEQ -
-    JMP SelectWarp   ; Jump To SelectWarp
+    JMP WarpSelect   ; Jump To WarpSelect
+
 
 .ORG $1F20
-
 InputViewer:
   LDA #$80
   STA PpuControl_2000
@@ -195,16 +202,16 @@ InputViewer:
   LDA #$01
   JSR InputPPUSkipPointer
 SpawnPointActivatePrint:
-  LDA SpawnTilePrint
+  LDA spawnTilePrint
   STA PpuData_2007
   LDA #$02
-  STA SpawnTilePrint
-  JMP CheckSelect
+  STA spawnTilePrint
+  JMP BtnSelectCheck
 InputPPUWrite:
   STX PpuAddr_2006
   STY PpuAddr_2006
 InputPPUSkipPointer:
-  AND Input
+  AND input
   BEQ +
   TYA
   ADC #$10
@@ -216,7 +223,7 @@ InputPPUSkipPointer:
 
 
 .ORG $1F7B
-DrawHUDValues:
+HUDDraw:
   STX PpuAddr_2006
   LDY #$12
   STY PpuAddr_2006
@@ -248,51 +255,54 @@ DrawHUDValues:
 FrameTimerReset:
   STA $36 ; Replaced
   LDA #$00
-  STA FrameTimer_hi
-  STA FrameTimer_lo
+  STA frameTimer_hi
+  STA frameTimer_lo
   RTS
 	
-SelectWarp:
+WarpSelect:
   LDY #$00
-  LDA SpawnTypeUsed
-  BNE DrawHUDValues
-  LDA WarpWorldLast
-  BEQ DrawHUDValues
-  STA WorldNumber
-  INC IsInMap
-  LDA WarpIDLast
-  STA TempRoomID
-  JMP MapWarp
+  LDA spawnTypeUsed
+  BNE HUDDraw
+  LDA warpWorldLast
+  BEQ HUDDraw
+  STA worldNumber
+  INC mapIsIn
+  LDA warpIDLast
+  STA roomID_temp
+  JMP WarpMap
 	
-MapWarpRest:
-  LDA TempWorldNumber
-  STA WorldNumber
+WarpMapRest:
+  LDA worldNumber_temp
+  STA worldNumber
   JMP $830F
   BRK ; WHY IS THIS A 2 BYTE INSTRUCTION?! WTF WLA?!?!?!?!
 	
-MapGetData:
-  LDA (TempRoomID),Y
+WarpMapTableGetByte:
+  LDA (roomID_temp),Y
   INC $03
   RTS
 	
-ReDrawWorldNumberOnMenuExit:
-  LDA IsOnMapMenu
+WarpMapWorldNumberRedraw:
+  LDA isOnMapMenu
   BEQ +
 		LDX #$22
 		STX PpuAddr_2006
 		LDX #$4D
 		STX PpuAddr_2006
-		LDA WorldNumber
+		LDA worldNumber
 		ADC #$30
 		STA PpuData_2007
 	+
   RTS
 
+
 .BANK $03 SLOT "$A000"
+
 
 .ORG $0C21
 _insert_b03_00:
 	JSR $9880
+	
 	
 .ORG $0D88
 _insert_b03_01:
@@ -300,15 +310,17 @@ _insert_b03_01:
 	NOP
 	NOP
 
+
 .ORG $1641
 _insert_b03_02:
-	JSR $BFC0
+	JSR _insert_b03_03
 	JMP $B64C
 	NOP
 	NOP
 	NOP
 	NOP
 	NOP
+	
 	
 .ORG $1FC0
 _insert_b03_03:
@@ -325,14 +337,17 @@ _insert_b03_03:
 
 .BANK $04 SLOT "$A000"
 
+
 .ORG $112C
 _insert_b04_00:
 .DB $04,$02
+
 
 .ORG $182C
 _insert_b04_01:
 	NOP
 	NOP
+	
 	
 .ORG $1845
 _insert_b04_02:
@@ -341,6 +356,7 @@ _insert_b04_02:
 	NOP
 	NOP
 	JSR $98A0
+	
 	
 .ORG $1880
 _insert_b04_03:
@@ -352,6 +368,7 @@ _insert_b04_03:
 	STA $7F20,X
 	+
 	RTS
+
 
 .ORG $18A0
 _insert_b04_04:
@@ -366,51 +383,58 @@ _insert_b04_04:
 	LDA $7F0D
 	RTS
 	
+	
 .BANK $05 SLOT "$A000"
+
+
 .ORG $10C2
 FrameTimerInject:
 	NOP
   JSR FrameTimerIncrement
 	
+	
 .ORG $18B0
 FrameTimerIncrement:
 	CLC
-	LDA FrameTimer_lo
+	LDA frameTimer_lo
 	ADC #$01
 	CMP #$64
 	BCC ++
-		LDA FrameTimer_hi
+		LDA frameTimer_hi
 		ADC #$00;$01 w/c
 		CMP #$64
 		BCC +
 			LDA #$00
 		+
-		STA FrameTimer_hi
+		STA frameTimer_hi
 		LDA #$00
 	++
-	STA FrameTimer_lo
-	STA CoinCount_lo
-	LDA FrameTimer_hi
-	STA CoinCount_hi
-	LDA PlayerState ; Replaced
+	STA frameTimer_lo
+	STA coinCount_lo
+	LDA frameTimer_hi
+	STA coinCount_hi
+	LDA marioControllable ; Replaced
 	CMP #$07 ; Replaced
 	RTS
 
 	
 .BANK $08 SLOT "$8000"
 
+
 .ORG $0B8C
 	JSR SpawnTriggerDisplaySet_B08
 
+
 .ORG $19B0
 SpawnTriggerDisplaySet_B08:
-	STA SpawnX
+	STA spawnX
 	LDA #$12
-	STA SpawnTilePrint
+	STA spawnTilePrint
   RTS
 	
 	
 .BANK $09 SLOT "$A000"
+
 
 .ORG $04DD
 _insert_b09_00:
@@ -420,6 +444,7 @@ _insert_b09_00:
 	NOP
 	NOP
 	NOP
+	
 	
 .ORG $1FE0
 _insert_b09_01:
@@ -450,11 +475,15 @@ _insert_b09_01:
 	
 ; Map Data
 .BANK $0C SLOT "$A000"
+
+
 .ORG $0000
 .INCBIN "src\bank0C_mapdata.bin"
 
 
 .BANK $0D SLOT "$A000"
+
+
 .ORG $0EB2
 _insert_b0D_00:
 	JMP $B760
@@ -462,9 +491,11 @@ _insert_b0D_00:
 	JMP $B880
 	NOP
 	
+	
 .ORG $0ECE
 _insert_b0D_01:
 	CPY #$60
+	
 	
 .ORG $0EE3
 _insert_b0D_02:
@@ -499,9 +530,10 @@ _insert_b0D_02:
 _insert_b0D_03:
 	JMP $B780
 	
+	
 .ORG $0FD6
 _insert_b0D_04:
-	JMP DrawXYOnMapEndLoad
+	JMP MapDrawLoadEndDrawXY
 	RTS
 	NOP
 	NOP
@@ -511,21 +543,23 @@ _insert_b0D_04:
 	NOP
 	NOP
 
+
 .ORG $166B
 insert_b0D_05:
 	LDA #$08
   STA $2001
 
+
 .ORG $1760
 insert_b0D_06:
-  LDA IsOnMapMenu
+  LDA isOnMapMenu
   BNE +
 		-
-		LDA DrawMapRowCounter
+		LDA mapDrawRowCounter
 		JMP $AEB5
 	+
   LDA #$FC
-  ADC DrawMapRowCounter
+  ADC mapDrawRowCounter
   BMI -
   JMP $AEDA
   NOP
@@ -540,20 +574,20 @@ insert_b0D_06:
   NOP
 .DB $00;BRK
 	
-DontDrawOnMenuRows:
-  LDA DrawMapRowCounter
+MapDrawIgnoreMenuRows:
+  LDA mapDrawRowCounter
   CMP #$07
   BEQ ++
   CMP #$06
   BEQ ++
   CMP #$05
   BEQ ++
-  LDA IsOnMapMenu
+  LDA isOnMapMenu
   BEQ +
-		LDA DrawMapRowCounter
+		LDA mapDrawRowCounter
 		JMP $AF68
 	+
-  LDA DrawMapRowCounter
+  LDA mapDrawRowCounter
 	++
   JMP $AF8D
 
@@ -562,19 +596,19 @@ DontDrawOnMenuRows:
 .DB $00,$00,$00,$00, $00,$00,$00,$00
 .DB $00,$00,$00,$00, $00,$00,$00,$00
 	
-	
-DrawXYOnMapEndLoad:
+MapDrawLoadEndDrawXY:
   LDA #$00
-  STA DrawMapFlags
+  STA mapDrawFlags
   LDA #$01
-  STA IsInMap
+  STA mapIsIn
   NOP
   NOP
   NOP
   RTS
 	
+	
 .ORG $1800
-_CH_MapTheFuckinDraw:
+MapDraw_maybe:
 	LDA #$20
   STA PpuAddr_2006
   LDA #$A2
@@ -614,11 +648,12 @@ _CH_MapTheFuckinDraw:
   LDX #$9F
   STX PpuData_2007
   STA PpuData_2007
-  INC DrawMapFlags
+  INC mapDrawFlags
   RTS
 
+
 .ORG $1880
-_CH_MapDrawData_OrSomeShit:
+MapDrawData_maybe:
 .DB $0A,$A8,$B9,$9E, $B8,$8D,$06,$20
 .DB $C8,$B9,$9E,$B8, $8D,$06,$20,$4C
 .DB $C7,$AE,$00,$00, $00,$00,$00,$00
@@ -629,9 +664,11 @@ _CH_MapDrawData_OrSomeShit:
 
 .BANK $0E SLOT "$A000"
 
+
 .ORG $0B04
 insert_b0E_00:
 .DB $67,$20,$72 ; A text fix? huh?
+
 
 .ORG $1B04
 insert_b0e_01:
@@ -639,6 +676,7 @@ insert_b0e_01:
 
 
 .BANK $10 SLOT "$A000"
+
 
 .ORG $0042
 insert_b10_00:
@@ -649,21 +687,26 @@ insert_b10_00:
 insert_b10_01:
 .DB $01,$9C ; Graphics?
 
+
 .ORG $01F7
 insert_b10_02:
 .DB $01,$D0 ; Graphics?
+
 
 .ORG $0295
 insert_b10_03:
 .DB $38,$C1 ; Graphics?
 
+
 .ORG $0495
 insert_b10_04:
 .DB $01,$C7 ; Graphics?
 
+
 .ORG $0805
 insert_b10_05:
 .DB $01,$41 ; Graphics?
+
 
 .ORG $0C9A
 insert_b10_06:
@@ -672,13 +715,16 @@ insert_b10_06:
 
 .BANK $11 SLOT "$A000"
 
+
 .ORG $05B1
 insert_b11_00:
 .DB $02,$A8 ; Graphics?
 
+
 .ORG $14D8
 insert_b11_01:
 .DB $02,$AE ; Graphics?
+
 
 .ORG $154E
 insert_b11_02:
@@ -687,35 +733,43 @@ insert_b11_02:
 
 ; Title Screen Version
 .BANK $1D SLOT "$A000"
+
+
 .ORG $020B
 .DB "PRACTICE HACK v1.03"
 .DB $00,$00,$00,$00, $00,$00,$00,$00
 
+
 .ORG $19CE
 	JSR SpawnTriggerDisplaySet_B1D
 
+
 .ORG $1FD0
 SpawnTriggerDisplaySet_B1D:
-	STA SpawnX
+	STA spawnX
 	LDA #$12
-	STA SpawnTilePrint
-	LDA SpawnX
+	STA spawnTilePrint
+	LDA spawnX
   RTS
 
 
 .BANK $1E SLOT "$8000"
 
+
 ; hijack and transfer the player to the menu routine
 .ORG $0B3C
-  BEQ BEQMapRoutine
+  BEQ +
+
 
 .ORG $0B49
-BEQMapRoutine:
+	+
   JMP MapRoutine
 	NOP
 	NOP
 
+
 .ORG $0E90
+ScanlineInterruptHandle_maybe:
   LDA $0590 ; scanline counter
   CMP #$03
   BEQ +
@@ -740,28 +794,29 @@ BEQMapRoutine:
 	+
 	
   LDY #$00
-  STY PPU_MASK
+  STY PpuMask_2001
   RTS
+
 
 .ORG $1120
 MapRoutine:
   LDA #%00011000
   STA PPUMaskVar
 
-  LDA IsInMap
+  LDA mapIsIn
   AND #%10000000
-  BNE JumpBackFromMapRoutine
+  BNE ++
 
   JSR MapMenuToggle
-  LDX IsOnMapMenu
+  LDX isOnMapMenu
   BEQ +
-		JSR MenuRoutine
-		JSR GoThroughSettings
+		JSR PracticeMenuRoutine
+		JSR PracticeMenuSettingsHandle
 		LDA #$00
 	+
-  JMP UpdateXYMapTiles
+  JMP MapTilesUpdateXY
   LDA #$00
-JumpBackFromMapRoutine:
+	++
   JMP $8B4E
 	
 	NOP
@@ -774,27 +829,27 @@ JumpBackFromMapRoutine:
 	NOP
 	NOP
 
-UpdateXYMapTiles:
+MapTilesUpdateXY:
   LDA #$B0
   STA PpuControl_2000
   LDA #$20
   STA PpuAddr_2006
   LDA #$D7
   STA PpuAddr_2006
-  LDA TempWorldNumber
+  LDA worldNumber_temp
   ADC #$01
   STA PpuData_2007
   LDA #$20
   STA PpuAddr_2006
   LDA #$DA
   STA PpuAddr_2006
-  LDA MapCursorX
+  LDA mapCursorX
   STA PpuData_2007
   LDA #$20
   STA PpuAddr_2006
   LDA #$DD
   STA PpuAddr_2006
-  LDA MapCursorY
+  LDA mapCursorY
   ADC #$02
   STA PpuData_2007
   JMP $8B51
@@ -805,22 +860,23 @@ UpdateXYMapTiles:
 .DB $00,$00,$00,$00, $00,$00,$00,$00
 .DB $00
  
-GoThroughSettings:
-  LDA MenuSelector
+PracticeMenuSettingsHandle:
+  LDA practiceMenuCursorPos
   ASL A ; times two
   TAY
 
-  LDA MenuSettingsAddr,Y
-  STA TempAddr3+1
+  LDA PracticeMenuSettings,Y
+  STA addr03_temp+1
   INY
-  LDA MenuSettingsAddr,Y
-  STA TempAddr3
+  LDA PracticeMenuSettings,Y
+  STA addr03_temp
 
-  JMP (TempAddr3)	
+  JMP (addr03_temp)	
 	RTS
 	
+	
 .ORG $11C0
-_CH_garbage0:
+_dataOrSomething0_maybe:
 	PHA
   PLA
   PHA
@@ -829,33 +885,33 @@ _CH_garbage0:
 
 
 .ORG $11F0
-_CH_notSure0:
+_dataOrSomething1_maybe:
 .DB $AD,$F7,$07,$D0, $08,$A9,$AA,$8D
 .DB $05,$51,$4C,$52, $8E,$A9,$00,$8D
 	
 	
 .ORG $1314
 MapMenuToggle:
-  LDA Input
-  AND #Select_Button
+  LDA input
+  AND #BTN_Select
   BEQ +
-  AND DelayedInput
+  AND inputDelayed
   BNE +
-  LDA IsOnMapMenu
+  LDA isOnMapMenu
   EOR #%00000001
-  STA IsOnMapMenu
-  JSR MenuIsToggling
+  STA isOnMapMenu
+  JSR PracticeMenuToggle
 +
   RTS
 	NOP
 	NOP
 
 CheckToChangeMapWorld:
-  LDX TempWorldNumber
-  LDA Input
-  AND #Right_Dir
+  LDX worldNumber_temp
+  LDA input
+  AND #BTN_Right
   BEQ +
-  AND DelayedInput
+  AND inputDelayed
   BNE +
   INX
   CPX #$04
@@ -863,50 +919,51 @@ CheckToChangeMapWorld:
   LDX #$01
   JMP ++
 +
-  LDA Input
-  AND #Left_Dir
+  LDA input
+  AND #BTN_Left
   BEQ +++
-  AND DelayedInput
+  AND inputDelayed
   BNE +++
   DEX
   CPX #$00
   BNE ++
   LDX #$03
 ++
-  STX TempWorldNumber
+  STX worldNumber_temp
   CLC
-  JSR DrawWorldValue
+  JSR PracticeMenuWorldDraw
   INC PPUIOStep
   LDA #$00
-  STA PPU_MASK
+  STA PpuMask_2001
   LDA #$30
   STA PpuAddr_2006
   LDA #$00
   STA PpuAddr_2006
-  TXA ; TempWorldNumber
-  JSR ChangeMapTiles
+  TXA ;worldNumber_temp
+  JSR MapTilesChange
   LDA #$81
-  STA IsInMap
+  STA mapIsIn
   LDA #$0A
   STA PPUIORoutine
-  JSR PlaySwooshSFX
+  JSR SFXPlaySwoosh
 +++
   RTS
 	NOP
 	
-MenuIsToggling:
-  LDA #Sfx_EnemySmack
-  STA Square1SoundQueue
-  LDA IsOnMapMenu
+PracticeMenuToggle:
+  LDA #SFX_EnemySmack
+  STA square1SoundQueue
+  LDA isOnMapMenu
   BEQ +
-		JSR UpdateMenuTexts
+		JSR PracticeMenuTextUpdate
 	+
-  JMP DrawAllMenuValues
+  JMP PracticeMenuDrawAll
+	
 	
 .ORG $139A
-PlaySwooshSFX:
-  LDA #Sfx_StompNOI
-  STA Square1SoundQueue
+SFXPlaySwoosh:
+  LDA #SFX_StompNOI
+  STA square1SoundQueue
   RTS
 	
 .DB $EA,$EA,$EA,$EA, $EA,$EA,$EA,$EA
@@ -918,15 +975,17 @@ PlaySwooshSFX:
 .DB $EA,$EA,$EA,$EA, $EA,$EA,$EA,$EA
 .DB $EA,$EA,$EA,$EA, $EA,$EA,$EA,$EA
 
+
 .ORG $13E0
-MenuSettingsAddr:
+PracticeMenuSettings:
 	.DB $93,$2C,$97,$60, $97,$94,$00,$00
 	.DB $9B,$00,$00,$00, $97,$E0,$99,$40
 	.DB $00,$00,$00,$00, $00,$00,$00,$00
 	.DB $00,$00,$A0,$00, $8C,$43,$07,$60
 	
+	
 .ORG $14AD
-ChangeMapTiles:
+MapTilesChange:
   CLC
   ADC #$9F
   STA $07
@@ -941,27 +1000,27 @@ ChangeMapTiles:
   ORA #$70
   STA $05
   LDA #$8C
-  STA PRGPort1
+  STA BANK_PRG_A000_5115
   LDY #$FF
-  STY TempRoomID
+  STY roomID_temp
   LDY #$3F
 -
   LDA #$01
-  STA RAMPort
+  STA BANK_SRAM_6000_5113 ; WTF RiYAN? Isn't this entirely visible?! wut the bloddie fook is this mayte?!?!
   LDA ($04),Y
   DEY
   STY $03
   LDY #$00
-  STY RAMPort
-  LDY TempRoomID
+  STY BANK_SRAM_6000_5113 ; WTF RiYAN? Isn't this entirely visible?! wut the bloddie fook is this mayte?!?!
+  LDY roomID_temp
   PHA
   AND #$C0
   STA $00
   LDA ($06),Y
-  STA MinimapTiles,Y
+  STA minimapTiles,Y
   AND #$3F
   ORA $00
-  STA MinimapFlags,Y
+  STA minimapFlags,Y
   JSR +
   PLA
   ASL A
@@ -971,10 +1030,10 @@ ChangeMapTiles:
   AND #$C0
   STA $00
   LDA ($06),Y
-  STA MinimapTiles,Y
+  STA minimapTiles,Y
   AND #$3F
   ORA $00
-  STA MinimapFlags,Y
+  STA minimapFlags,Y
   JSR +
   PLA
   ASL A
@@ -984,10 +1043,10 @@ ChangeMapTiles:
   AND #$C0
   STA $00
   LDA ($06),Y
-  STA MinimapTiles,Y
+  STA minimapTiles,Y
   AND #$3F
   ORA $00
-  STA MinimapFlags,Y
+  STA minimapFlags,Y
   JSR +
   PLA
   ASL A
@@ -997,16 +1056,16 @@ ChangeMapTiles:
   AND #$C0
   STA $00
   LDA ($06),Y
-  STA MinimapTiles,Y
+  STA minimapTiles,Y
   AND #$3F
   ORA $00
-  STA MinimapFlags,Y
+  STA minimapFlags,Y
   JSR +
   PLA
   ASL A
   ASL A
   DEY
-  STY TempRoomID
+  STY roomID_temp
   LDY $03
   BMI ++
   JMP -
@@ -1022,8 +1081,9 @@ ChangeMapTiles:
   STA $7B00,Y
   RTS
 
+
 .ORG $1560
-MenuTexts:
+PracticeMenuTexts:
 .DB "World"
 .DB "Dashes"
 .DB "Collect"
@@ -1035,43 +1095,44 @@ MenuTexts:
 .DB "Respawn"
 .DB "Powerups"
 
+
 .ORG $15C0
-MenuRoutine:
-  LDA Input
-  AND #Up_Dir
+PracticeMenuRoutine:
+  LDA input
+  AND #BTN_Up
   BEQ +++
-  AND DelayedInput
+  AND inputDelayed
   BNE +++
 
 ; play stomp SFX
-  LDX #Sfx_StompSQ
-  STX Square1SoundQueue
+  LDX #SFX_StompSQ
+  STX square1SoundQueue
 
-  DEC MenuSelector
+  DEC practiceMenuCursorPos
   BPL ++
   LDA #$07
-  STA MenuSelector
+  STA practiceMenuCursorPos
   JMP ++
 	+++
-  LDA Input
-  AND #Down_Dir
+  LDA input
+  AND #BTN_Down
   BEQ ++
-  AND DelayedInput
+  AND inputDelayed
   BNE ++
 
 ; play stomp SFX
-  LDX #Sfx_StompSQ
-  STX Square1SoundQueue
+  LDX #SFX_StompSQ
+  STX square1SoundQueue
 
-  LDX MenuSelector
+  LDX practiceMenuCursorPos
   INX
   CPX #$08
   BNE +
   LDX #$00
   +
-  STX MenuSelector
+  STX practiceMenuCursorPos
   ++
-  LDA MenuSelector
+  LDA practiceMenuCursorPos
   TAY
   ASL A
   ASL A
@@ -1090,23 +1151,24 @@ MenuRoutine:
   STA $0233
   RTS
 
+
 .ORG $1640
-UpdateMenuTexts:
-  LDA IsOnMapMenu
+PracticeMenuTextUpdate:
+  LDA isOnMapMenu
   BNE +
 		RTS
 	+
   LDA #$60
-  STA TempAddrA
+  STA addr0A_temp
   LDA #$95
-  STA TempAddrA+1
+  STA addr0A_temp+1
   LDA #$22
   STA PpuAddr_2006
   LDA #$46
   STA PpuAddr_2006
   LDX #$05
 	-
-  LDA (TempAddrA),Y
+  LDA (addr0A_temp),Y
   STA PpuData_2007
   INY
   DEX
@@ -1117,7 +1179,7 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$06
 	-
-  LDA (TempAddrA),Y
+  LDA (addr0A_temp),Y
   STA PpuData_2007
   INY
   DEX
@@ -1128,7 +1190,7 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$07
 	-
-  LDA (TempAddrA),Y
+  LDA (addr0A_temp),Y
   STA PpuData_2007
   INY
   DEX
@@ -1139,7 +1201,7 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$07
 	-
-  LDA (TempAddrA),Y
+  LDA (addr0A_temp),Y
   STA PpuData_2007
   INY
   DEX
@@ -1150,7 +1212,7 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$06
 	-
-  LDA (TempAddrA),Y
+  LDA (addr0A_temp),Y
   STA PpuData_2007
   INY
   DEX
@@ -1161,7 +1223,7 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$0A
 	-
-  LDA (TempAddrA),Y
+  LDA (addr0A_temp),Y
   STA PpuData_2007
   INY
   DEX
@@ -1172,7 +1234,7 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$07
 	-
-  LDA (TempAddrA),Y
+  LDA (addr0A_temp),Y
   STA PpuData_2007
   INY
   DEX
@@ -1183,7 +1245,7 @@ UpdateMenuTexts:
   STA PpuAddr_2006
   LDX #$08
 	-
-  LDA (TempAddrA),Y
+  LDA (addr0A_temp),Y
   STA PpuData_2007
   INY
   DEX
@@ -1192,13 +1254,14 @@ UpdateMenuTexts:
   NOP
   NOP
 
+
 .ORG $1760
-CheckToChangeMaxDashes:
-  LDX MaxDashesCount
-  LDA Input
-  AND #Right_Dir
+PracticeMenuMaxDashesChange:
+  LDX maxDashesCount
+  LDA input
+  AND #BTN_Right
   BEQ +
-  AND DelayedInput
+  AND inputDelayed
   BNE +
   INX
   CPX #$08
@@ -1206,97 +1269,97 @@ CheckToChangeMaxDashes:
   LDX #$01
   JMP ++
 + ; check if pressing left
-  LDA Input
-  AND #Left_Dir
+  LDA input
+  AND #BTN_Left
   BEQ +++
-  AND DelayedInput
+  AND inputDelayed
   BNE +++
   DEX
   CPX #$00
   BNE ++
   LDX #$07
 ++: ; do stuff
-  STX MaxDashesCount
-  JSR DrawDashesValue
-  ; JSR $9390
-  JSR PlaySwooshSFX
+  STX maxDashesCount
+  JSR PracticeMenuDashesDraw
+  JSR SFXPlaySwoosh
 +++: ; end
   LDX #$00
   RTS
 
-CheckToChangeCollect:
-  LDA PracticeFlags
+PracticeMenuCollectChange:
+  LDA practiceFlags
   TAY
   AND #%00000110
   LSR A
   TAX
-  LDA Input
-  AND #Right_Dir
+  LDA input
+  AND #BTN_Right
   BEQ +
-  AND DelayedInput
+  AND inputDelayed
   BNE +
   INX
   CPX #$04
-  BNE UpdateMenuCollect
+  BNE ++
   LDX #$00
-  JMP UpdateMenuCollect
-+
-  LDA Input
-  AND #Left_Dir
-  BEQ SkipUpdateMenuCollect
-  AND DelayedInput
-  BNE SkipUpdateMenuCollect
+  JMP ++
+	+
+  LDA input
+  AND #BTN_Left
+  BEQ +++
+  AND inputDelayed
+  BNE +++
   DEX
-  BPL UpdateMenuCollect
-  LDX #$03
-UpdateMenuCollect:
+  BPL ++
+		LDX #$03
+	++
   TXA
   ASL A
-  STA PracticeFlags
+  STA practiceFlags
   TYA
   AND #$F9
-  ADC PracticeFlags
-  STA PracticeFlags
-  JSR DrawCollectValues
-  JSR PlaySwooshSFX
-SkipUpdateMenuCollect:
+  ADC practiceFlags
+  STA practiceFlags
+  JSR PracticeMenuCollectDraw
+  JSR SFXPlaySwoosh
+	+++
   LDX #$00
   RTS
 	
+	
 .ORG $17E0
-CheckToChangeRespawnType:
-  LDA Input
+PracticeMenuRespawnChange:
+  LDA input
   AND #$01
   BEQ +
-  AND DelayedInput
+  AND inputDelayed
   BNE +
-  LDA PracticeFlags
+  LDA practiceFlags
   EOR #$01
   JMP ++
 	+
-  LDA Input
+  LDA input
   AND #$02
   BEQ +
-  AND DelayedInput
+  AND inputDelayed
   BNE +
 	++
-  LDA PracticeFlags
+  LDA practiceFlags
   EOR #$01
-  STA PracticeFlags
-  JSR DrawRespawnValue
-  JSR PlaySwooshSFX
+  STA practiceFlags
+  JSR PracticeMenuRespawnDraw
+  JSR SFXPlaySwoosh
 	+
   LDX #$00
   RTS
 
 	
 .ORG $1820
-DrawCollectValues:
+PracticeMenuCollectDraw:
   LDA #$22
   STA PpuAddr_2006
   LDA #$8D
   STA PpuAddr_2006
-  LDA PracticeFlags
+  LDA practiceFlags
   TAX
   AND #$02
   BEQ +
@@ -1319,35 +1382,37 @@ DrawCollectValues:
 
 	
 .ORG $1860
-DrawWorldValue:
+PracticeMenuWorldDraw:
   LDA #$22
   STA PpuAddr_2006
   LDA #$4D
   STA PpuAddr_2006
-  LDA TempWorldNumber
+  LDA worldNumber_temp
   ADC #$30
   STA PpuData_2007
   RTS
 	
+	
 .ORG $1880
-DrawDashesValue:
+PracticeMenuDashesDraw:
   LDA #$22
   STA PpuAddr_2006
   LDA #$6D
   STA PpuAddr_2006
   CLC
-  LDA MaxDashesCount
+  LDA maxDashesCount
   ADC #$30
   STA PpuData_2007
   RTS
 	
+	
 .ORG $18A0
-DrawRespawnValue:
+PracticeMenuRespawnDraw:
   LDA #$23
   STA PpuAddr_2006
   LDA #$0D
   STA PpuAddr_2006
-  LDA PracticeFlags
+  LDA practiceFlags
   AND #$01
   BNE +
 		LDA #$53
@@ -1372,35 +1437,36 @@ DrawRespawnValue:
 
 	
 .ORG $1900
-DrawAllMenuValues:
-  JSR DrawWorldValue
-  JSR DrawDashesValue
-  JSR DrawCollectValues
-  JSR DrawSelectType
-  JSR DrawRespawnValue
-  JSR DrawAbilities
+PracticeMenuDrawAll:
+  JSR PracticeMenuWorldDraw
+  JSR PracticeMenuDashesDraw
+  JSR PracticeMenuCollectDraw
+  JSR PracticeMenuSelectDraw
+  JSR PracticeMenuRespawnDraw
+  JSR PracticeMenuAbilityDraw
   JMP $8B51
 	
+	
 .ORG $1940
-CheckToChangeAbilities:
+PracticeMenuAbilitiesChange:
   LDA #$00
-  LDX WalljumpAbility
+  LDX abilityWallJump
   BEQ +
 		ADC #$01 ; PROB: WHAT IS THE CARRY FLAG?!
 	+
-  LDX DashAbility
+  LDX abilityDash
   BEQ +
 		ADC #$02
 	+
-  LDX InventoryItem
+  LDX inventoryItem
   BEQ +
 		ADC #$04
 	+
   TAX
-  LDA Input
+  LDA input
   AND #$01
   BEQ +
-  AND DelayedInput
+  AND inputDelayed
   BNE +
   INX
   CPX #$08
@@ -1408,10 +1474,10 @@ CheckToChangeAbilities:
   LDX #$00
   JMP ++
 	+
-  LDA Input
+  LDA input
   AND #$02
   BEQ +++
-  AND DelayedInput
+  AND inputDelayed
   BNE +++
   DEX
   BPL ++
@@ -1422,31 +1488,31 @@ CheckToChangeAbilities:
   BEQ +
 		LDA #$02
 	+
-  STA WalljumpAbility
+  STA abilityWallJump
   TXA
   AND #$02
-  STA DashAbility
+  STA abilityDash
   TXA
   AND #$04
   BEQ +
 		LDA #$03
 	+
-  STA InventoryItem
-  JSR DrawAbilities
-  JSR PlaySwooshSFX
+  STA inventoryItem
+  JSR PracticeMenuAbilityDraw
+  JSR SFXPlaySwoosh
 	+++
   LDX #$00
   RTS
 
 	
 .ORG $19C0
-DrawAbilities:
+PracticeMenuAbilityDraw:
   LDX #$00
   LDA #$22
   STA PpuAddr_2006
   LDA #$97
   STA PpuAddr_2006
-  LDA WalljumpAbility
+  LDA abilityWallJump
   BNE +
   LDA #$90
   STA PpuData_2007
@@ -1460,7 +1526,7 @@ DrawAbilities:
   STA PpuData_2007
 	++
   STX PpuData_2007
-  LDA DashAbility
+  LDA abilityDash
   BNE +
   LDA #$90
   STA PpuData_2007
@@ -1474,7 +1540,7 @@ DrawAbilities:
   STA PpuData_2007
 	++
   STX PpuData_2007
-  LDA InventoryItem
+  LDA inventoryItem
   BNE +
   LDA #$90
   STA PpuData_2007
@@ -1491,7 +1557,7 @@ DrawAbilities:
   STA PpuAddr_2006
   LDA #$B7
   STA PpuAddr_2006
-  LDA WalljumpAbility
+  LDA abilityWallJump
   BNE +
   LDA #$A0
   STA PpuData_2007
@@ -1505,7 +1571,7 @@ DrawAbilities:
   STA PpuData_2007
 	++
   STX PpuData_2007
-  LDA DashAbility
+  LDA abilityDash
   BNE +
   LDA #$A0
   STA PpuData_2007
@@ -1519,7 +1585,7 @@ DrawAbilities:
   STA PpuData_2007
 	++
   STX PpuData_2007
-  LDA InventoryItem
+  LDA inventoryItem
   BNE +
   LDA #$A0
   STA PpuData_2007
@@ -1536,12 +1602,12 @@ DrawAbilities:
 
 	
 .ORG $1AA0
-DrawSelectType:
+PracticeMenuSelectDraw:
   LDA #$22
   STA PpuAddr_2006
   LDA #$CD
   STA PpuAddr_2006
-  LDA PracticeFlags
+  LDA practiceFlags
   AND #$08
   BNE +
 		LDA #$57
@@ -1570,25 +1636,27 @@ DrawSelectType:
 	
 	
 .ORG $1B00
-CheckToChangeSelectType:
-  LDA Input
+PracticeMenuSelectChange:
+; BUG: There is a known issue where this gets stuck on warp instead of select sometimes, emi saw it, CH saw it, can't reproduce reliably...  - CH
+; BUG2: Ok, it seems as if you warp to a different world before you set the xray settings, SOMETIMES, it gets stuck on select warp, not sure, will investigate further - CH
+  LDA input
   AND #$01
   BEQ +
-  AND DelayedInput
+  AND inputDelayed
   BNE +
   JMP ++
 	+
-  LDA Input
+  LDA input
   AND #$02
   BEQ +
-  AND DelayedInput
+  AND inputDelayed
   BNE +
 	++
-  LDA PracticeFlags
+  LDA practiceFlags
   EOR #$08
-  STA PracticeFlags
-  JSR DrawSelectType
-  JSR PlaySwooshSFX
+  STA practiceFlags
+  JSR PracticeMenuSelectDraw
+  JSR SFXPlaySwoosh
 	+
   LDX #$00
   RTS
@@ -1596,28 +1664,26 @@ CheckToChangeSelectType:
 	
 .BANK $1F SLOT "$E000"
 
-CallFastRespawn:
+
 .ORG $08FF
+RespawnFastInject:
 	JSR $FCC0
 	NOP
 	NOP
 
+
 .ORG $1CC0
-CheckIfFastRespawn:
+RespawnFastCheck:
   TAY
-  LDA PracticeFlags
+  LDA practiceFlags
   AND #$01
   BNE +
-  LDA #$FF
-  STA DeathTimer
-  TYA
-  RTS
+		LDA #$FF
+		STA deathTimer
+		TYA
+		RTS
 	+
 	LDA #$E1
-  STA DeathTimer
+  STA deathTimer
   TYA
 	RTS
-
-
-	
-

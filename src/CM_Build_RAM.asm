@@ -1,103 +1,111 @@
 ; NES Ram Vars
 .BANK 0 SLOT "RAM_NES"
 
-Temp_Var0 = $00
-TempAddr = $00
-Temp_Var1 = $01
-Temp_Var2 = $02
-TempRoomID = $02
-Temp_Var3 = $03
-TempAddr3 = $03
-Temp_Var4 = $04
-Temp_Var5 = $05
-Temp_Var6 = $06
-Temp_Var7 = $07
-TempAddrA = $0A
+
+var0 = $00
+addr_temp = $00
+var1 = $01
+var2 = $02
+roomID_temp = $02
+var3 = $03
+addr03_temp = $03
+var4 = $04
+var5 = $05
+var6 = $06
+var7 = $07
+addr0A_temp = $0A
 
 
-PlayerState = $0E		          ;If this value is equal to 8, the player can control Mario.
-AirborneState	 = $20	        ;0 = standing on ground, 1 = jumping, 2 = falling
+marioControllable = $0E		          ;If this value is equal to 8, the player can control Mario.
+marioAirborne	 = $20	        ;0 = standing on ground, 1 = jumping, 2 = falling
 
-MapCursorX = $46
-MapCursorY = $47
+mapCursorX = $46
+mapCursorY = $47
 
-XSpeed = $50	                ;The horizontal speed that Mario is trying to go. This does not account for any external speed changes (moving platforms, slopes, etc.)
+marioSpeedX = $50	                ;The horizontal speed that Mario is trying to go. This does not account for any external speed changes (moving platforms, slopes, etc.)
 
-XPage = $65	                ;The horizontal screen page that Mario is currently on.
-XPixel = $7A		                ;The horizontal pixel that Mario is at.
-YSpeed = $8F	                ;The vertical speed that Mario is trying to go, positive down.
-YPixel = $B9		                ;The vertical pixel that Mario is at. Higher value = lower on the screen.
-Input = $E2    
-DelayedInput = $E3    
+marioPageX = $65	                ;The horizontal screen page that Mario is currently on.
+marioPixelX = $7A		                ;The horizontal pixel that Mario is at.
+marioSpeedY = $8F	                ;The vertical speed that Mario is trying to go, positive down.
+marioPixelY = $B9		                ;The vertical pixel that Mario is at. Higher value = lower on the screen.
+input = $E2    
+inputDelayed = $E3    
 
-MinimapOffset = $0119 ;Calculated by the minimap updater
+minimapOffset = $0119 ;Calculated by the minimap updater
 
-XSubspeed = $03C0	            ;Essentially Mario’s acceleration value. When it is high, he will accelerate quicker, and when it is low, he will decelerate quicker.
-YSubspeed	 = $03EB	            ;Mario’s vertical acceleration.
-XSubpixel	 = $03C1	            ;The horizontal subpixel that Mario is at. Though there is no visible difference, a higher value means further to the right.
-YSubpixel = $03D6	              ;Mario’s vertical subpixel
+marioAccelX = $03C0	            ;Essentially Mario’s acceleration value. When it is high, he will accelerate quicker, and when it is low, he will decelerate quicker.
+marioAccelY	 = $03EB	            ;Mario’s vertical acceleration.
+marioSubpixelX	 = $03C1	            ;The horizontal subpixel that Mario is at. Though there is no visible difference, a higher value means further to the right.
+marioSubpixelY = $03D6	              ;Mario’s vertical subpixel
 
-IsInMap = $04BD 
+mapIsIn = $04BD 
 
-DeathTimer = $04C2  
+deathTimer = $04C2  
 
-SpeedBoostBonus	 = $052B	      ;If this value is 16, then speed boost is active
-SpeedBoostTimer = $052C		      ;In order for the speed boost to activate, this timer must count up to 96.
-DashTimer  = $0545	             ;A dash will last until this timer is complete
-DashReadyTimer = $0546	        ;When a dash is initiated, the game will freeze until this timer is complete.
+marioSpeedBoostBonus	 = $052B	      ;If this value is 16, then speed boost is active
+marioSpeedBoostTimer = $052C		      ;In order for the speed boost to activate, this timer must count up to 96.
+marioDashTimer  = $0545	             ;A dash will last until this timer is complete
+marioDashReadyTimer = $0546	        ;When a dash is initiated, the game will freeze until this timer is complete.
 
-WorldNumber = $057F   
+worldNumber = $057F   
 
-GroundedStatus = $070C		        ;A moon will not be counted until Mario is on solid ground. If this is equal to 1, Mario can collect a moon.
-DreamBlockStatus = $070F		      ;7D = inside dream block, 7E = exiting dream block
+marioGrounded = $070C		        ;A moon will not be counted until Mario is on solid ground. If this is equal to 1, Mario can collect a moon.
+marioDreamBlock = $070F		      ;7D = inside dream block, 7E = exiting dream block
 
 PPUMaskVar = $0743
-RoomID = $074D   
-RoomIDTemp = $074E   
-SpawnTypeUsed = $0751   
-SpawnXHigh = $0753   
-SpawnX = $0758   
-SpawnYHigh = $0759   
-SpawnY = $075A   
-RoomOffset = $075B   
-SpawnType = $075C   
+roomID = $074D   
+roomIDTemp = $074E   
+spawnTypeUsed = $0751   
+spawnXHigh = $0753   
+spawnX = $0758   
+spawnYHigh = $0759   
+spawnY = $075A   
+roomOffset = $075B   
+spawnType = $075C   
 
-WallJumpLeniencyTimer = $079C	  ;If the timer is at 2 or higher, Mario can wall jump.
-WallKickTimer = $079D		        ;After a wall kick, Mario will be forced away from the wall until this timer is complete
+wallJumpLeniencyTimer = $079C	  ;If the timer is at 2 or higher, Mario can wall jump.
+wallKickTimer = $079D		        ;After a wall kick, Mario will be forced away from the wall until this timer is complete
 
-PracticeFlags = $07F8
-MenuSelector = $07F9
-IsOnMapMenu = $07FA
-TempWorldNumber = $07FB
-WarpWorldLast = $07FC
-WarpIDLast = $07FD
+practiceFlags = $07F8
+practiceMenuCursorPos = $07F9
+isOnMapMenu = $07FA
+worldNumber_temp = $07FB
+warpWorldLast = $07FC
+warpIDLast = $07FD
 
-ColdBootOffset = <$07FE ;Constant
-CompatibilityID	= $07FF ;0=all compatible, 1=ExRAM not supported, 2=joypad reading not compatible
+coldBootOffset = <$07FE ;Constant
+compatibilityID	= $07FF ;0=all compatible, 1=ExRAM not supported, 2=joypad reading not compatible
 
 PPUIORoutine = $1C07 ;If non-zero and in cutscene, IRQ type is altered.
 PPUIOStep = $1C08 ;Coefficient, usually downcounting
 
+
 ; Cartridge Ram Vars
 .BANK 0 SLOT "RAM_CART"
 
-SpawnTilePrint = $77ED
-FrameTimer_hi	= $77EE
-FrameTimer_lo	= $77EF
 
-Square1SoundQueue = $7804
+attributeMap = $7600 ;Attribute (palette) map
+areaParserBuffer_Offset = $7700
+areaParserMetatileBuffer = $7701 ;This would replace the usual metatile buffer for the area parser.
 
-MinimapFlags = $7A00
-MinimapTiles = $7B00
 
-DrawMapFlags = $7C07
-DrawMapRowCounter = $7C08
+spawnTilePrint = $77ED
+frameTimer_hi	= $77EE
+frameTimer_lo	= $77EF
 
-MaxDashesCount = $7F03
+square1SoundQueue = $7804
 
-CoinCount_hi = $7F06
-CoinCount_lo = $7F07
-SpawnSwitchStatus = $7F16
-DashAbility = $7F2A
-WalljumpAbility = $7F2F
-InventoryItem = $7FFA
+minimapFlags = $7A00
+minimapTiles = $7B00
+
+mapDrawFlags = $7C07
+mapDrawRowCounter = $7C08
+
+maxDashesCount = $7F03
+
+coinCount_hi = $7F06
+coinCount_lo = $7F07
+spawnSwitchStatus = $7F16
+abilityDash = $7F2A
+abilityWallJump = $7F2F
+inventoryItem = $7FFA
