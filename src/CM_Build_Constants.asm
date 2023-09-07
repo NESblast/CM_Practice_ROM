@@ -1,12 +1,19 @@
 ; inputs
-BTN_A              = %10000000
-BTN_B              = %01000000
-BTN_Select         = %00100000
-BTN_Start          = %00010000
-BTN_Up             = %00001000
-BTN_Down           = %00000100
-BTN_Left           = %00000010
 BTN_Right          = %00000001
+BTN_Left           = %00000010
+BTN_Down           = %00000100
+BTN_Up             = %00001000
+BTN_Start          = %00010000
+BTN_Select         = %00100000
+BTN_B              = %01000000
+BTN_A              = %10000000
+
+PRAC_respawnQuick     = %00000001
+PRAC_moonCollect      = %00000010
+PRAC_btnSelect        = %00001000
+PRAC_messageShow      = %00100000
+
+PRAC_moonsAndMessages = PRAC_moonCollect + PRAC_messageShow
 
 
 ;sound effects constants

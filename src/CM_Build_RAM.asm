@@ -42,7 +42,7 @@ mapIsIn = $04BD
 
 deathTimer = $04C2  
 
-marioSpeedBoostBonus	 = $052B	      ;If this value is 16, then speed boost is active
+marioSpeedBoostBonus = $052B	      ;If this value is 16, then speed boost is active
 marioSpeedBoostTimer = $052C		      ;In order for the speed boost to activate, this timer must count up to 96.
 marioDashTimer  = $0545	             ;A dash will last until this timer is complete
 marioDashReadyTimer = $0546	        ;When a dash is initiated, the game will freeze until this timer is complete.
@@ -93,6 +93,7 @@ spawnTilePrint = $77ED
 frameTimer_hi	= $77EE
 frameTimer_lo	= $77EF
 
+musicQueue = $7803
 square1SoundQueue = $7804
 
 minimapFlags = $7A00
@@ -105,6 +106,7 @@ maxDashesCount = $7F03
 
 coinCount_hi = $7F06
 coinCount_lo = $7F07
+moonCount = $7F0E
 spawnSwitchStatus = $7F16
 marioAbilityDash = $7F2A
 marioAbilityWallJump = $7F2F
