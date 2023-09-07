@@ -626,7 +626,7 @@ MoonCollectHandle_B09:
 
 .ORG $0EB2
 MapDraw_Insert0_CH:
-	JMP $B760
+	JMP MapDraw_Insert6_CH
 	CLC
 	JMP MapDraw_Insert7_CH
 	NOP
@@ -659,7 +659,7 @@ MapDraw_Insert2_CH:
 	RTS
 	
 ; Uh data i guess?
-.DB $4C,$00,$B8,$00, $89,$8B,$89,$8C
+.DB $4C,$00,$B8,$8A, $89,$8B,$89,$8C
 .DB $8D,$85,$86,$89, $8E,$8F,$00,$84
 .DB $85,$86,$87,$88, $89,$9C,$94,$85
 .DB $95,$96,$97,$98, $00,$00,$00,$00
@@ -741,18 +741,6 @@ MapDrawLoadEndDrawXY:
 	
 .ORG $1800
 MapDraw_maybe:
-	LDA #$20
-  STA PpuAddr_2006
-  LDA #$A2
-  STA PpuAddr_2006
-  LDX #$00
-	-
-		LDA $AF0D,X
-		BEQ +
-		STA PpuData_2007
-		INX
-  BNE -
-	+
   LDA #$20
   STA PpuAddr_2006
   LDA #$C2
@@ -780,15 +768,13 @@ MapDraw_maybe:
   LDX #$9F
   STX PpuData_2007
   STA PpuData_2007
-  INC mapDrawFlags
-  
-	LDA practiceMenuInitialized
-	BNE +++
 	LDA #$22
   STA PpuAddr_2006
   LDA #$6A
   STA PpuAddr_2006
 	LDX #$0C
+	LDA isOnMapMenu
+	BNE ++
 	LDY #$00
 	-
 		LDA PracticeMenuTeaserText, y
@@ -808,11 +794,12 @@ MapDraw_maybe:
 		INY
 		DEX
 	BNE -
-	+++
-	RTS
-	
+	++
+  INC mapDrawFlags
+  RTS
 
-.ORG $1900
+
+.ORG $1880
 MapDraw_Insert7_CH:
 	ASL A
 	TAY
@@ -824,13 +811,12 @@ MapDraw_Insert7_CH:
 	JMP $AEC7
 
 
-.ORG $1920
-MapDrawData_maybe:
+.ORG $18A0
 .DB $21,$00,$21,$60, $21,$C0,$22,$20
 .DB $22,$80,$22,$E0, $22,$E0,$00,$00
 
 
-.ORG $1A00
+.ORG $1900
 PracticeMenuTeaserText:
 .DB "Press Select"
 .DB "For Menu"
@@ -1119,9 +1105,9 @@ PracticeMenuMapWorldChange:
 PracticeMenuToggle:
   LDA #SFX_EnemySmack
   STA square1SoundQueue
-  LDA practiceMenuInitialized
-  BNE +
-		JSR PracticeMenuTextUpdate
+  LDA isOnMapMenu
+  BEQ +
+		JSR PracticeMenuTextStaticDraw
 	+
   JMP PracticeMenuDrawAll
 	
@@ -1313,16 +1299,13 @@ PracticeMenuRoutine:
 
 
 .ORG $1640
-PracticeMenuTextUpdate:
-	LDA #$00
-	STA PPUMaskVar
+PracticeMenuTextStaticDraw:
 	; i hardcoded these instead, for speed, should be enough room for a few of them, can redo temp address if need be. -CH
   ;LDA #<PracticeMenuTexts
   ;STA addr0A_temp
   ;LDA #>PracticeMenuTexts
   ;STA addr0A_temp+1
   LDA #$22
-	STA practiceMenuInitialized
   STA PpuAddr_2006
   LDA #$46
   STA PpuAddr_2006
@@ -1346,8 +1329,11 @@ PracticeMenuTextUpdate:
   DEX
   BNE -
 	LDA #$00
-	LDX #$0B ; Clear message
+	LDX #$03 ; Clear message
 	-
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
 		STA PpuData_2007
 		DEX
 	BNE -
@@ -1366,16 +1352,22 @@ PracticeMenuTextUpdate:
   STA PpuAddr_2006
   LDA #$A3
   STA PpuAddr_2006
-  LDX #$08 ; Messages
+  LDX #$04 ; Messages
 	-
   LDA PracticeMenuTexts, y
+  STA PpuData_2007
+  INY
+	LDA PracticeMenuTexts, y
   STA PpuData_2007
   INY
   DEX
   BNE -
 	LDA #$00
-	LDX #$09 ; Clear message
+	LDX #$03 ; Clear message
 	-
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
 		STA PpuData_2007
 		DEX
 	BNE -
@@ -1405,8 +1397,11 @@ PracticeMenuTextUpdate:
   STA PpuAddr_2006
   LDA #$57
   STA PpuAddr_2006
-  LDX #$08 ; Powerups
+  LDX #$04 ; Powerups
 	-
+	LDA PracticeMenuTexts, y
+  STA PpuData_2007
+  INY
   LDA PracticeMenuTexts, y
   STA PpuData_2007
   INY
