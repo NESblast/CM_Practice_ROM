@@ -87,8 +87,15 @@ HUDColorFixXY:
 .ORG $1112
 	.DB $8D
 	
+	
 .ORG $111D
-HUDDisplayVanilla:	
+HUDDisplayVanilla:
+
+
+.ORG $113C
+HUDStarBarDontDrawEnd:
+	LDX #$0F ; $10 goes all the way, clear out one tile
+
 
 .ORG $1129
   JMP BankSwitchHUD
