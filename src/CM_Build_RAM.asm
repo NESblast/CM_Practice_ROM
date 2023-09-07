@@ -88,7 +88,7 @@ attributeMap = $7600 ;Attribute (palette) map
 areaParserBuffer_Offset = $7700
 areaParserMetatileBuffer = $7701 ;This would replace the usual metatile buffer for the area parser.
 
-
+practiceMenuInitialized = $77EC
 spawnTilePrint = $77ED
 frameTimer_hi	= $77EE
 frameTimer_lo	= $77EF

@@ -420,14 +420,14 @@ MoonCollectIncHandle_7F0B:
 MoonCollectSuperMessageSkip:
 	PHA
 	LDA practiceFlags
-	AND #PRAC_moonsAndMessages
-	CMP #PRAC_moonsAndMessages
+	AND #PRAC_messageShow
 	BEQ +
 		PLA
-		RTS
+		JMP $F6E8	
 	+
 	PLA
-	JMP $F6E8
+	RTS
+	
 
 .BANK $04 SLOT "$8000"
 
@@ -628,7 +628,7 @@ MoonCollectHandle_B09:
 MapDraw_Insert0_CH:
 	JMP $B760
 	CLC
-	JMP $B880
+	JMP MapDraw_Insert7_CH
 	NOP
 	
 	
@@ -659,7 +659,7 @@ MapDraw_Insert2_CH:
 	RTS
 	
 ; Uh data i guess?
-.DB $4C,$00,$B8,$8A, $89,$8B,$89,$8C
+.DB $4C,$00,$B8,$00, $89,$8B,$89,$8C
 .DB $8D,$85,$86,$89, $8E,$8F,$00,$84
 .DB $85,$86,$87,$88, $89,$9C,$94,$85
 .DB $95,$96,$97,$98, $00,$00,$00,$00
@@ -781,17 +781,59 @@ MapDraw_maybe:
   STX PpuData_2007
   STA PpuData_2007
   INC mapDrawFlags
-  RTS
+  
+	LDA practiceMenuInitialized
+	BNE +++
+	LDA #$22
+  STA PpuAddr_2006
+  LDA #$6A
+  STA PpuAddr_2006
+	LDX #$0C
+	LDY #$00
+	-
+		LDA PracticeMenuTeaserText, y
+		STA PpuData_2007
+		INY
+		DEX
+	BNE -
+	
+	LDA #$22
+  STA PpuAddr_2006
+  LDA #$AC
+  STA PpuAddr_2006
+	LDX #$08
+	-
+		LDA PracticeMenuTeaserText, y
+		STA PpuData_2007
+		INY
+		DEX
+	BNE -
+	+++
+	RTS
+	
+
+.ORG $1900
+MapDraw_Insert7_CH:
+	ASL A
+	TAY
+	LDA $B89E,Y
+	STA $2006
+	INY
+	LDA $B89E,Y
+	STA $2006
+	JMP $AEC7
 
 
-.ORG $1880
+.ORG $1920
 MapDrawData_maybe:
-.DB $0A,$A8,$B9,$9E, $B8,$8D,$06,$20
-.DB $C8,$B9,$9E,$B8, $8D,$06,$20,$4C
-.DB $C7,$AE,$00,$00, $00,$00,$00,$00
-.DB $00,$00,$00,$00, $00,$00,$00,$00
 .DB $21,$00,$21,$60, $21,$C0,$22,$20
 .DB $22,$80,$22,$E0, $22,$E0,$00,$00
+
+
+.ORG $1A00
+PracticeMenuTeaserText:
+.DB "Press Select"
+.DB "For Menu"
 
 
 .BANK $0E SLOT "$A000"
@@ -1077,8 +1119,8 @@ PracticeMenuMapWorldChange:
 PracticeMenuToggle:
   LDA #SFX_EnemySmack
   STA square1SoundQueue
-  LDA isOnMapMenu
-  BEQ +
+  LDA practiceMenuInitialized
+  BNE +
 		JSR PracticeMenuTextUpdate
 	+
   JMP PracticeMenuDrawAll
@@ -1091,8 +1133,7 @@ PracticeMenuSettings_lo:
 .DB >PracticeMenuMoonsChange
 .DB >PracticeMenuMessagesChange
 .DB >PracticeMenuSelectChange
-;.DB >PracticeMenuDeathWarpChange
-.DB >PracticeMenuRespawnChange
+.DB >PracticeMenuDeathChange
 .DB >PracticeMenuAbilitiesChange
 ;	.DB $93,$2C,$97,$60, $97,$94,$00,$00
 ;	.DB $9B,$00,$00,$00, $97,$E0,$99,$40
@@ -1106,8 +1147,7 @@ PracticeMenuSettings_hi:
 .DB <PracticeMenuMoonsChange
 .DB <PracticeMenuMessagesChange
 .DB <PracticeMenuSelectChange
-;.DB <PracticeMenuDeathWarpChange
-.DB <PracticeMenuRespawnChange
+.DB <PracticeMenuDeathChange
 .DB <PracticeMenuAbilitiesChange
 	
 	
@@ -1274,12 +1314,15 @@ PracticeMenuRoutine:
 
 .ORG $1640
 PracticeMenuTextUpdate:
+	LDA #$00
+	STA PPUMaskVar
 	; i hardcoded these instead, for speed, should be enough room for a few of them, can redo temp address if need be. -CH
   ;LDA #<PracticeMenuTexts
   ;STA addr0A_temp
   ;LDA #>PracticeMenuTexts
   ;STA addr0A_temp+1
   LDA #$22
+	STA practiceMenuInitialized
   STA PpuAddr_2006
   LDA #$46
   STA PpuAddr_2006
@@ -1302,6 +1345,12 @@ PracticeMenuTextUpdate:
   INY
   DEX
   BNE -
+	LDA #$00
+	LDX #$0B ; Clear message
+	-
+		STA PpuData_2007
+		DEX
+	BNE -
   LDA #$22
   STA PpuAddr_2006
   LDA #$86
@@ -1324,6 +1373,12 @@ PracticeMenuTextUpdate:
   INY
   DEX
   BNE -
+	LDA #$00
+	LDX #$09 ; Clear message
+	-
+		STA PpuData_2007
+		DEX
+	BNE -
   LDA #$22
   STA PpuAddr_2006
   LDA #$C5
@@ -1422,11 +1477,8 @@ PracticeMenuMessagesChange:
 	BNE -
 	RTS
 	
-PracticeMenuDeathWarpChange:
-	RTS
 	
-	
-PracticeMenuRespawnChange:
+PracticeMenuDeathChange:
   AND #BTN_Right
   BEQ +
 		-
@@ -1435,7 +1487,7 @@ PracticeMenuRespawnChange:
 		STA practiceFlags
 		LDA #SFX_StompNOI
 		STA square1SoundQueue
-		JMP PracticeMenuRespawnDraw
+		JMP PracticeMenuDeathDraw
 	+
   TYA ;input
   AND #BTN_Left
@@ -1517,32 +1569,30 @@ PracticeMenuMessagesDraw:
   RTS
 	
 	
-PracticeMenuRespawnDraw:
+PracticeMenuDeathText:
+.DB "Normal"
+.DB $00,$00
+.DB "Fast"
+.DB $00,$00,$00,$00
+
+PracticeMenuDeathDraw:
   LDA #$22
   STA PpuAddr_2006
   LDA #$ED
   STA PpuAddr_2006
   LDA practiceFlags
-  AND #$01
-  BNE +
-		LDA #$53
+	AND #PRAC_respawnQuick
+	ASL
+	ASL
+	ASL
+	TAY
+	LDX #$08
+	-
+		LDA PracticeMenuDeathText, y
 		STA PpuData_2007
-		LDA #$6C
-		STA PpuData_2007
-		LDA #$6F
-		STA PpuData_2007
-		LDA #$77
-		STA PpuData_2007
-		RTS
-	+
-  LDA #$46
-  STA PpuData_2007
-  LDA #$61
-  STA PpuData_2007
-  LDA #$73
-  STA PpuData_2007
-  LDA #$74
-  STA PpuData_2007
+		INY
+		DEX
+	BNE -
   RTS
 	
 	
@@ -1552,7 +1602,7 @@ PracticeMenuDrawAll:
   JSR PracticeMenuMoonsDraw
   JSR PracticeMenuSelectDraw
 	JSR PracticeMenuMessagesDraw
-  JSR PracticeMenuRespawnDraw
+  JSR PracticeMenuDeathDraw
   JSR PracticeMenuAbilityDraw
   JMP $8B51
 	
