@@ -57,34 +57,36 @@ WarpMapHandle:
 	STA warpWorldLast
 	ASL A
 	ASL A
-	ASL A
 	CLC
-	ADC #$9B
+	ADC #$A2
 	STA $03
-	JSR WarpMapTableGetByte
-	STA roomID
-	JSR WarpMapTableGetByte
-	STA spawnXHigh
-	JSR WarpMapTableGetByte
-	STA spawnX
-	JSR WarpMapTableGetByte
-	STA spawnYHigh
-	JSR WarpMapTableGetByte
-	STA spawnY
-	JSR WarpMapTableGetByte
-	STA spawnType
-	STA spawnTypeUsed
-	JSR WarpMapTableGetByte
-	STA roomOffset
-	JSR WarpMapTableGetByte
-	STA spawnSwitchStatus
-	LDA #$0E
-	STA $0E
-	STY $0765
-	JMP WarpMapReset
+  JMP WarpTableCopyData
+	; JSR WarpMapTableGetByte
+  ; STX roomOffset
+	; STA roomID
+	; JSR WarpMapTableGetByte
+  ; STX spawnXHigh
+  ; ASL
+  ; ASL
+  ; ASL
+  ; STA spawnX
+	; JSR WarpMapTableGetByte
+	; STX spawnYHigh
+  ; ASL
+  ; ASL
+  ; ASL
+  ; STA spawnY
+	; JSR WarpMapTableGetByte
+  ; STX spawnSwitchStatus
+	; STA spawnType
+	; STA spawnTypeUsed
+	; LDA #$0E
+	; STA $0E
+	; STY $0765
+	; JMP WarpMapReset
 	
-HUDColorFixXY:
 .ORG $1112
+HUDColorFixXY:
 	.DB $8D
 	
 	
@@ -198,11 +200,6 @@ WarpMapReset:
   LDA worldNumber_temp
   STA worldNumber
   JMP PauseMenuEntry0_b0
-	
-WarpMapTableGetByte:
-  LDA (roomID_temp),Y
-  INC $03
-  RTS
 	
 WarpMapWorldNumberRedraw:
   LDA isOnMapMenu
@@ -647,7 +644,70 @@ MoonCollectHandle_B09:
 
 .ORG $0000
 .INCBIN "src\bank0C_mapdata.bin"
-
+.ORG $1E00
+WarpTableCopyData:
+  LDA (roomID_temp),Y ;Byte 1 (Room)
+  TAX
+  LSR
+  LSR
+  LSR 
+  LSR 
+  LSR  
+  AND #$07
+  STA roomOffset
+  TXA
+  AND #$1F
+  STA roomID
+  INC $03
+  LDA (roomID_temp),Y ;Byte 2 (X Position)
+  TAX
+  LSR
+  LSR
+  LSR 
+  LSR 
+  LSR  
+  AND #$07
+  STA spawnXHigh
+  TXA
+  ASL
+  ASL
+  ASL
+  AND #$F8
+  STA spawnX
+  INC $03
+  LDA (roomID_temp),Y ;Byte 3 (Y Position)
+  TAX
+  LSR
+  LSR
+  LSR 
+  LSR 
+  LSR  
+  AND #$07
+  STA spawnYHigh
+  TXA
+  ASL
+  ASL
+  ASL
+  AND #$F8
+  STA spawnY
+  INC $03
+  LDA (roomID_temp),Y ;Byte 4 (Status/Type)
+  TAX
+  LSR
+  LSR
+  LSR 
+  LSR 
+  LSR  
+  AND #$07
+  STA spawnSwitchStatus
+  TXA
+  AND #$1F
+  STA spawnType
+  STA spawnTypeUsed
+	LDA #$0E
+	STA $0E
+	STY $0765
+	JMP WarpMapReset
 
 .BANK $0D SLOT "$A000"
 
