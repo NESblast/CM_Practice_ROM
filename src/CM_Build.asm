@@ -381,6 +381,16 @@ _insert_b03_00:
 	JSR MoonCollectDashHandle_b04
 	
 	
+.ORG $0CD3
+ItemMessageSkip:
+	JSR MoonCollectMessageSkip_b03
+	
+	
+.ORG $0D05
+ItemExplanationSkip:
+	JSR ItemSkipExplanation
+	
+
 .ORG $0D88
 MoonCollectIncInject_b3_00:
 	JSR MoonCollectIncHandle_7F0B
@@ -397,8 +407,8 @@ _insert_b03_02:
 	NOP
 	
 .ORG $1671
-MoonCollectSuperMessageSkip_Inject:
-	JSR MoonCollectSuperMessageSkip
+MoonCollectSuperMessageSkip:
+	JSR MoonCollectMessageSkip_b03
 
 	
 .ORG $1E00
@@ -424,13 +434,24 @@ MoonCollectIncHandle_7F0B:
 	PLA
 	RTS
 	
-MoonCollectSuperMessageSkip:
+MoonCollectMessageSkip_b03:
 	PHA
 	LDA practiceFlags
 	AND #PRAC_messageShow
 	BEQ +
 		PLA
 		JMP $F6E8	
+	+
+	PLA
+	RTS
+	
+ItemSkipExplanation:
+	PHA
+	LDA practiceFlags
+	AND #PRAC_messageShow
+	BEQ +
+		PLA
+		JMP $F729
 	+
 	PLA
 	RTS
