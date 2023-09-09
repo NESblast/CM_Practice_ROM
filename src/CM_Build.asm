@@ -912,72 +912,29 @@ PracticeMenuTeaserText:
 
 .BANK $0E SLOT "$A000"
 
-
 .ORG $0B04
 _insert_b0E_00:
 .DB $67,$20,$72 ; A text fix? huh?
-
 
 .ORG $1B04
 _insert_b0e_01:
 .DB $C9,$00,$EA ; A text fix? huh?
 
-
 .BANK $10 SLOT "$A000"
-
-
-.ORG $0042
-_insert_b10_00:
-.DB $01,$D5,$D0 ; Graphics?
-
-
-.ORG $01BA
-_insert_b10_01:
-.DB $01,$9C ; Graphics?
-
-
-.ORG $01F7
-_insert_b10_02:
-.DB $01,$D0 ; Graphics?
-
-
-.ORG $0295
-_insert_b10_03:
-.DB $38,$C1 ; Graphics?
-
-
-.ORG $0495
-_insert_b10_04:
-.DB $01,$C7 ; Graphics?
-
-
-.ORG $0805
-_insert_b10_05:
-.DB $01,$41 ; Graphics?
-
-
-.ORG $0C9A
-_insert_b10_06:
-.DB $01,$87 ; Graphics?
-
+.ORG $0000
+.INCBIN "src\bank10_mappositions1.bin"
 
 .BANK $11 SLOT "$A000"
+.ORG $0000
+.INCBIN "src\bank11_mappositions2.bin"
 
+.BANK $12 SLOT "$A000"
+.ORG $0000
+.INCBIN "src\bank12_mappositions3.bin"
 
-.ORG $05B1
-_insert_b11_00:
-.DB $02,$A8 ; Graphics?
-
-
-.ORG $14D8
-_insert_b11_01:
-.DB $02,$AE ; Graphics?
-
-
-.ORG $154E
-_insert_b11_02:
-.DB $02,$90 ; Graphics?
-
+.BANK $13 SLOT "$A000"
+.ORG $0000
+.INCBIN "src\bank13_mappositions4.bin"
 
 ; Title Screen Version
 .BANK $1D SLOT "$A000"
@@ -1156,7 +1113,7 @@ PracticeMenuMapWorldChange:
   AND #BTN_Right
   BEQ +
   INX
-  CPX #$04
+  CPX #$05  ;Value that overflows to world 1
   BNE ++
   LDX #$01
   JMP ++
@@ -1166,7 +1123,7 @@ PracticeMenuMapWorldChange:
 	BEQ +++
   DEX
   BNE ++
-  LDX #$03
+  LDX #$04  ;Value that world 1 underflows to
 ++
   STX worldNumber_temp
   CLC
