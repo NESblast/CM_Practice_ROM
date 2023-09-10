@@ -108,6 +108,7 @@ coinCount_hi = $7F06
 coinCount_lo = $7F07
 moonCount = $7F0E
 spawnSwitchStatus = $7F16
+marioAbilityXray = $7F23
 marioAbilityDash = $7F2A
 marioAbilityWallJump = $7F2F
 inventoryItem = $7FFA

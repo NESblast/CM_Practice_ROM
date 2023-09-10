@@ -1662,7 +1662,7 @@ PracticeMenuAbilitiesChange:
   BEQ +
 		ORA #$02
 	+
-  LDX inventoryItem
+  LDX marioAbilityXray
   BEQ +
 		ORA #$04
 	+
@@ -1686,7 +1686,7 @@ PracticeMenuAbilitiesChange:
   TXA
   AND #$01
   BEQ +
-		LDA #$02
+		ASL A
 	+
   STA marioAbilityWallJump
   TXA
@@ -1694,6 +1694,10 @@ PracticeMenuAbilitiesChange:
   STA marioAbilityDash
   TXA
   AND #$04
+	LSR A
+	STA marioAbilityXray
+	TXA
+	AND #$04
   BEQ +
 		LDA #$03
 	+
