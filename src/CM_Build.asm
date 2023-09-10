@@ -85,6 +85,11 @@ WarpMapHandle:
 	; STY $0765
 	; JMP WarpMapReset
 	
+; Save RAM in $6E00-$6FFF
+.ORG $0F47
+SaveIn_6E00_6FFF:
+	LDX #$6D
+	
 .ORG $1112
 HUDColorFixXY:
 	.DB $8D
@@ -941,7 +946,7 @@ _insert_b0e_01:
 
 
 .ORG $020B
-.DB "PRACTICE ROM v1.1"
+.DB "PRACTICE ROM v1.2"
 .DB $00,$00,$00,$00, $00,$00,$00,$00
 .DB $00,$00
 
@@ -997,7 +1002,7 @@ ScanlineInterruptHandle_maybe:
   LDY #$00
   STY PpuMask_2001
   RTS
-
+	
 
 .ORG $1120
 MapRoutine:

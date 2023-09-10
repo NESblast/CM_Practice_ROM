@@ -66,8 +66,6 @@ spawnType = $075C
 wallJumpLeniencyTimer = $079C	  ;If the timer is at 2 or higher, Mario can wall jump.
 wallKickTimer = $079D		        ;After a wall kick, Mario will be forced away from the wall until this timer is complete
 
-practiceFlags = $07F8
-practiceMenuCursorPos = $07F9
 isOnMapMenu = $07FA
 worldNumber_temp = $07FB
 warpWorldLast = $07FC
@@ -83,6 +81,8 @@ PPUIOStep = $1C08 ;Coefficient, usually downcounting
 ; Cartridge Ram Vars
 .BANK 0 SLOT "RAM_CART"
 
+practiceMenuCursorPos = $6FFE
+practiceFlags = $6FFF
 
 attributeMap = $7600 ;Attribute (palette) map
 areaParserBuffer_Offset = $7700
