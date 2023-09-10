@@ -87,8 +87,8 @@ WarpMapHandle:
 	
 ; Save RAM in $6E00-$6FFF
 .ORG $0F47
-SaveIn_6E00_6FFF:
-	LDX #$6D
+SaveIn_6F00_6FFF:
+	LDX #$6E
 	
 .ORG $1112
 HUDColorFixXY:
