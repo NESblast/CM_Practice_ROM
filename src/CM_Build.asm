@@ -1685,9 +1685,7 @@ PracticeMenuAbilitiesChange:
 	++
   TXA
   AND #$01
-  BEQ +
-		ASL A
-	+
+	ASL A
   STA marioAbilityWallJump
   TXA
   AND #$02

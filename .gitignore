@@ -17,3 +17,11 @@ CM_Build.sym
 CM_Build_ROM.mlb
 CM_Build_ROM.nes
 NES_labels.asm
+VBinDiff-3.0_beta5/AUTHORS.txt
+VBinDiff-3.0_beta5/COPYING.txt
+VBinDiff-3.0_beta5/ReadMe.txt
+VBinDiff-3.0_beta5/VBinDiff.exe
+VBinDiff-3.0_beta5/VBinDiff.txt
+src/CM_Build.asm
+CM_1_0_noheader.nes
+CM_1_0.nes
