@@ -1464,8 +1464,6 @@ PracticeMenuTextStaticDraw:
   DEX
   BNE -
   RTS
-  NOP
-  NOP
 
 
 PracticeMenuMaxDashesChange:
