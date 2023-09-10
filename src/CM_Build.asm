@@ -1371,9 +1371,12 @@ PracticeMenuTextStaticDraw:
   STA PpuAddr_2006
   LDA #$65
   STA PpuAddr_2006
-  LDX #$06 ; Dashes
+  LDX #$03 ; Dashes
 	-
   LDA PracticeMenuTexts, y
+  STA PpuData_2007
+  INY
+	LDA PracticeMenuTexts, y
   STA PpuData_2007
   INY
   DEX
@@ -1425,9 +1428,12 @@ PracticeMenuTextStaticDraw:
   STA PpuAddr_2006
   LDA #$C5
   STA PpuAddr_2006
-  LDX #$06 ; Select
+  LDX #$03 ; Select
 	-
   LDA PracticeMenuTexts, y
+  STA PpuData_2007
+  INY
+	LDA PracticeMenuTexts, y
   STA PpuData_2007
   INY
   DEX
