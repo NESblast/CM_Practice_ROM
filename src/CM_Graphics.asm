@@ -7,6 +7,10 @@
 .INCBIN "chr\mapCoors.chr"
 
 
+.ORG $0250
+.INCBIN "chr\percent_fix.chr"
+
+
 .ORG $0800
 .INCBIN "chr\fontRiYAN.chr"
 

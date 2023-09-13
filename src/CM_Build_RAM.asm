@@ -33,6 +33,9 @@ inputDelayed = $E3
 
 minimapOffset = $0119 ;Calculated by the minimap updater
 
+mapCursorPosY = $0230
+mapCursorPosX = $0233
+
 marioAccelX = $03C0	            ;Essentially Mario’s acceleration value. When it is high, he will accelerate quicker, and when it is low, he will decelerate quicker.
 marioAccelY	 = $03EB	            ;Mario’s vertical acceleration.
 marioSubpixelX	 = $03C1	            ;The horizontal subpixel that Mario is at. Though there is no visible difference, a higher value means further to the right.
@@ -80,6 +83,9 @@ PPUIOStep = $1C08 ;Coefficient, usually downcounting
 
 ; Cartridge Ram Vars
 .BANK 0 SLOT "RAM_CART"
+
+practiceMenuScreenSet = $6F7E
+practiceMenuScreenAt = $6F7F
 
 practiceMenuCursorPos = $6FFE
 practiceFlags = $6FFF

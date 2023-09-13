@@ -144,6 +144,10 @@ PPUReturn:
   STA PpuAddr_2006
   LDA $0E
   CMP #$0B
+	
+	
+.ORG $16FD
+MapTileUpdate:
 		
 		
 .ORG $17BF
@@ -157,10 +161,6 @@ MiniMapHandle:
 	ORA $07FE
 	STA $7B00,Y
 	RTS
-	
-
-.ORG $16FD
-MapTileUpdate:
 				
 				
 .ORG $17D0
@@ -726,8 +726,8 @@ MapDraw_Insert0_CH:
 	
 	
 .ORG $0ECE
-MapDraw_Insert1_CH:
-	CPY #$60
+MapDraw_ClearBottomScreen:
+	CPY #$80
 	
 	
 .ORG $0EE3
@@ -1011,29 +1011,29 @@ MapRoutine:
 
   LDA mapIsIn
   AND #%10000000
-  BNE ++
-
-  JSR MapMenuToggle
-  LDX isOnMapMenu
+  BNE +++
+	
+	LDX isOnMapMenu
   BEQ +
 		JSR PracticeMenuRoutine
 		JSR PracticeMenuSettingsHandle
 		LDA #$00
 	+
+	
+  LDA input
+	EOR inputDelayed
+	AND input
+  AND #BTN_Select
+  BEQ +
+		LDA #$01
+		EOR isOnMapMenu
+		STA isOnMapMenu
+		JSR PracticeMenuToggle
+	+
   JMP MapTilesUpdateXY
   LDA #$00
-	++
+	+++
   JMP $8B4E
-	
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
 
 MapTilesUpdateXY:
   LDA #$B0
@@ -1096,26 +1096,10 @@ _dataOrSomething1_maybe:
 .DB $AD,$F7,$07,$D0, $08,$A9,$AA,$8D
 .DB $05,$51,$4C,$52, $8E,$A9,$00,$8D
 	
-	
-.ORG $1314
-MapMenuToggle:
-  LDA input
-  AND #BTN_Select
-  BEQ +
-  AND inputDelayed
-  BNE +
-  LDA isOnMapMenu
-  EOR #%00000001
-  STA isOnMapMenu
-  JSR PracticeMenuToggle
-+
-  RTS
-	NOP
-	NOP
 
 PracticeMenuMapWorldChange:
   LDX worldNumber_temp
-  AND #BTN_Right
+  AND #BTN_Right_A
   BEQ +
   INX
   CPX #$05  ;Value that overflows to world 1
@@ -1124,7 +1108,7 @@ PracticeMenuMapWorldChange:
   JMP ++
 +
   TYA
-  AND #BTN_Left
+  AND #BTN_Left_B
 	BEQ +++
   DEX
   BNE ++
@@ -1150,16 +1134,20 @@ PracticeMenuMapWorldChange:
   STA square1SoundQueue
 +++
   RTS
-	NOP
+	
+	
 	
 PracticeMenuToggle:
   LDA #SFX_EnemySmack
   STA square1SoundQueue
   LDA isOnMapMenu
   BEQ +
-		JSR PracticeMenuTextStaticDraw
+		LDA #$01
+		STA practiceMenuScreenSet
+		JSR PracticeMenuLineClear
 	+
-  JMP PracticeMenuDrawAll
+	RTS
+	;JMP $8B51
 	
 
 .ORG $13A0
@@ -1170,6 +1158,8 @@ PracticeMenuSettings_lo:
 .DB >PracticeMenuMessagesChange
 .DB >PracticeMenuSelectChange
 .DB >PracticeMenuDeathChange
+.DB >PracticeMenuAnyChange
+.DB >PracticeMenu100Change
 .DB >PracticeMenuAbilitiesChange
 ;	.DB $93,$2C,$97,$60, $97,$94,$00,$00
 ;	.DB $9B,$00,$00,$00, $97,$E0,$99,$40
@@ -1184,6 +1174,8 @@ PracticeMenuSettings_hi:
 .DB <PracticeMenuMessagesChange
 .DB <PracticeMenuSelectChange
 .DB <PracticeMenuDeathChange
+.DB <PracticeMenuAnyChange
+.DB <PracticeMenu100Change
 .DB <PracticeMenuAbilitiesChange
 	
 	
@@ -1281,8 +1273,74 @@ MapTilesChange:
   STA $7B00,Y
   RTS
 
+;.ORG $15C0
+PracticeMenuRoutine:
 
-.ORG $1560
+	; Draw stuff if necessary
+	LDY practiceMenuScreenSet
+	BEQ ++
+	BMI +
+		STY practiceMenuScreenAt
+		JSR PracticeMenuLineDraw
+		LDA #$FF
+		EOR practiceMenuScreenSet
+		STA practiceMenuScreenSet
+		RTS
+	+
+		JSR PracticeMenuDrawParams
+		LDA #$00
+		STA practiceMenuScreenSet
+		RTS
+	++
+	
+  LDA input
+	EOR inputDelayed
+	AND input
+	TAY
+  AND #BTN_Up
+  BEQ +++
+		; play stomp SFX
+		LDX #SFX_StompSQ
+		STX square1SoundQueue
+
+		DEC practiceMenuCursorPos
+		BPL ++
+		LDA #$08
+		STA practiceMenuCursorPos
+		BNE ++
+	+++
+	TYA
+	AND #BTN_Down
+	BEQ ++
+		; play stomp SFX
+		LDX #SFX_StompSQ
+		STX square1SoundQueue
+		
+		LDX practiceMenuCursorPos
+		INX
+		CPX #$09
+		BNE +
+			LDX #$00
+		+
+		STX practiceMenuCursorPos
+  ++
+  LDY practiceMenuCursorPos
+	LDA PracticeMenuCursorPosX, y
+  STA mapCursorPosX
+	LDA PracticeMenuCursorPosY, y
+	STA mapCursorPosY
+	
+	RTS
+	
+PracticeMenuCursorPosX:
+.DB $58,$58,$58,$58, $58,$58,$58,$58
+.DB $B0
+
+PracticeMenuCursorPosY:
+.DB $7B,$83,$8B,$93, $9B,$A3,$B3,$BB
+.DB $7B
+
+
 PracticeMenuTexts:
 .DB "World"
 .DB "Dashes"
@@ -1291,65 +1349,50 @@ PracticeMenuTexts:
 .DB "Select"
 .DB "Death"
 .DB "Powerups"
+.DB "Any%"
+.DB $00,$00
+.DB "Segment"
+.DB $00
+.DB "Practice"
+.DB "100%"
+.DB $00,$00
+.DB "Segment"
+.DB $00
+.DB "Practice"
 
+PracticeMenuLineDraw_hi:
+.DB $22
 
-.ORG $15C0
-PracticeMenuRoutine:
-  LDA input
-	EOR inputDelayed
-	AND input
-	TAY
-  AND #BTN_Up
-  BEQ +++
-
-; play stomp SFX
-  LDX #SFX_StompSQ
-  STX square1SoundQueue
-
-  DEC practiceMenuCursorPos
-  BPL ++
-  LDA #$06
-  STA practiceMenuCursorPos
-  JMP ++
-	+++
-  TYA
-  AND #BTN_Down
-  BEQ ++
-
-; play stomp SFX
-  LDX #SFX_StompSQ
-  STX square1SoundQueue
-
-  LDX practiceMenuCursorPos
-  INX
-  CPX #$07
-  BNE +
-  LDX #$00
-  +
-  STX practiceMenuCursorPos
-  ++
-  LDA practiceMenuCursorPos
-  TAY
-  ASL A
-  ASL A
-  ASL A
-  ADC #$7B
-  CPY #$06
-  BNE +
-  SBC #$30
-  STA $0230
-  LDA #$B0
-  STA $0233
-  RTS
-  +
-  STA $0230
-  LDA #$58
-  STA $0233
-  RTS
+PracticeMenuLineDraw_lo:
+.DB $40
 
 
 .ORG $1640
-PracticeMenuTextStaticDraw:
+PracticeMenuLineClear:
+	LDA #$22
+  STA PpuAddr_2006
+	LDA #$40
+  STA PpuAddr_2006
+	LDA #$00
+  LDX #$20
+	-
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
+		DEX
+	BNE -
+	
+	RTS
+	
+PracticeMenuLineDraw:
+	
 	; i hardcoded these instead, for speed, should be enough room for a few of them, can redo temp address if need be. -CH
   ;LDA #<PracticeMenuTexts
   ;STA addr0A_temp
@@ -1360,6 +1403,7 @@ PracticeMenuTextStaticDraw:
   LDA #$46
   STA PpuAddr_2006
   LDX #$05 ; World
+	LDY #$00
 	-
 	; LDA (addr0A_temp), y
   LDA PracticeMenuTexts, y
@@ -1381,15 +1425,6 @@ PracticeMenuTextStaticDraw:
   INY
   DEX
   BNE -
-	LDA #$00
-	LDX #$03 ; Clear message
-	-
-		STA PpuData_2007
-		STA PpuData_2007
-		STA PpuData_2007
-		STA PpuData_2007
-		DEX
-	BNE -
   LDA #$22
   STA PpuAddr_2006
   LDA #$86
@@ -1415,15 +1450,6 @@ PracticeMenuTextStaticDraw:
   INY
   DEX
   BNE -
-	LDA #$00
-	LDX #$03 ; Clear message
-	-
-		STA PpuData_2007
-		STA PpuData_2007
-		STA PpuData_2007
-		STA PpuData_2007
-		DEX
-	BNE -
   LDA #$22
   STA PpuAddr_2006
   LDA #$C5
@@ -1463,12 +1489,42 @@ PracticeMenuTextStaticDraw:
   INY
   DEX
   BNE -
+	
+	LDA #$23
+  STA PpuAddr_2006
+  LDA #$27
+  STA PpuAddr_2006
+  LDX #$0B ; Any%  Segment Practice
+	-
+  LDA PracticeMenuTexts, y
+  STA PpuData_2007
+  INY
+	LDA PracticeMenuTexts, y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+	
+	LDA #$23
+  STA PpuAddr_2006
+  LDA #$47
+  STA PpuAddr_2006
+  LDX #$0B ; 100%  Segment Practice
+	-
+  LDA PracticeMenuTexts, y
+  STA PpuData_2007
+  INY
+	LDA PracticeMenuTexts, y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
   RTS
 
 
 PracticeMenuMaxDashesChange:
   LDX maxDashesCount
-  AND #BTN_Right
+  AND #BTN_Right_A
   BEQ +
   INX
   CPX #$08
@@ -1477,7 +1533,7 @@ PracticeMenuMaxDashesChange:
   JMP ++
 + ; check if pressing left
   TYA ;input
-  AND #BTN_Left
+  AND #BTN_Left_B
   BEQ +++
   DEX
   CPX #$00
@@ -1493,7 +1549,7 @@ PracticeMenuMaxDashesChange:
   RTS
 
 PracticeMenuMoonsChange:
-	AND #BTN_Right
+	AND #BTN_Right_A
 	BEQ +
 		-
 		LDA #%00000010
@@ -1505,12 +1561,12 @@ PracticeMenuMoonsChange:
 		RTS
 	+
 	TYA ;input
-	AND #BTN_Left
+	AND #BTN_Left_B
 	BNE -
 	RTS
 	
 PracticeMenuMessagesChange:
-	AND #BTN_Right
+	AND #BTN_Right_A
 	BEQ +
 		-
 		LDA #%00100000
@@ -1522,13 +1578,13 @@ PracticeMenuMessagesChange:
 		RTS
 	+
 	TYA ;input
-	AND #BTN_Left
+	AND #BTN_Left_B
 	BNE -
 	RTS
 	
 	
 PracticeMenuDeathChange:
-  AND #BTN_Right
+  AND #BTN_Right_A
   BEQ +
 		-
 		LDA practiceFlags
@@ -1539,7 +1595,7 @@ PracticeMenuDeathChange:
 		JMP PracticeMenuDeathDraw
 	+
   TYA ;input
-  AND #BTN_Left
+  AND #BTN_Left_B
 	BNE -
   RTS
 
@@ -1566,7 +1622,6 @@ PracticeMenuMoonsDraw:
 		INY
 		DEX
 	BNE -
-	
   RTS
 
 	
@@ -1645,7 +1700,7 @@ PracticeMenuDeathDraw:
   RTS
 	
 	
-PracticeMenuDrawAll:
+PracticeMenuDrawParams:
   JSR PracticeMenuWorldDraw
   JSR PracticeMenuDashesDraw
   JSR PracticeMenuMoonsDraw
@@ -1654,25 +1709,49 @@ PracticeMenuDrawAll:
   JSR PracticeMenuDeathDraw
   JSR PracticeMenuAbilityDraw
   JMP $8B51
+
+PracticeMenuAnyChange:
+	TYA ;input
+  AND #BTN_Left_B
+  BEQ +
+		BNE ++
+	+
+	TYA;input
+	AND #BTN_Right_A
+	BEQ +++
+	++
+	;JMP PauseExitHandle
+	;LDA #$20
+	;STA square1SoundQueue
+	+++
+	RTS
 	
+PracticeMenu100Change:
+	TYA ;input
+  AND #BTN_Left_B
+  BEQ +
+		BNE ++
+	+
+	TYA;input
+	AND #BTN_Right_A
+	BEQ +++
+	++
+	LDA #$20
+	STA square1SoundQueue
+	+++
+	RTS	
 	
 PracticeMenuAbilitiesChange:
-  LDA #$00
-  LDX marioAbilityWallJump
-  BEQ +
-		ORA #$01
-	+
-  LDX marioAbilityDash
-  BEQ +
-		ORA #$02
-	+
-  LDX marioAbilityXray
+  LDA marioAbilityWallJump
+  LSR
+	ORA marioAbilityDash
+	LDX marioAbilityXray
   BEQ +
 		ORA #$04
 	+
   TAX
   TYA ;input
-  AND #BTN_Left
+  AND #BTN_Left_B
   BEQ +
   INX
   CPX #$08
@@ -1681,7 +1760,7 @@ PracticeMenuAbilitiesChange:
   JMP ++
 	+
   TYA ;input
-  AND #BTN_Right
+  AND #BTN_Right_A
   BEQ +++
   DEX
   BPL ++
@@ -1845,12 +1924,12 @@ PracticeMenuSelectChange:
 	EOR inputDelayed
 	AND input
 	TAX
-  AND #BTN_Right
+  AND #BTN_Right_A
   BEQ +
   BNE ++
 	+
   TXA
-  AND #BTN_Left
+  AND #BTN_Left_B
   BEQ +
 	++
   LDA practiceFlags

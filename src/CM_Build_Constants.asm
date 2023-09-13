@@ -8,6 +8,9 @@ BTN_Select         = %00100000
 BTN_B              = %01000000
 BTN_A              = %10000000
 
+BTN_Right_A        = BTN_Right + BTN_A
+BTN_Left_B         = BTN_Left + BTN_B
+
 PRAC_respawnQuick     = %00000001
 PRAC_moonCollect      = %00000010
 PRAC_btnSelect        = %00001000
