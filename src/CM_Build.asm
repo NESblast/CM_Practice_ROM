@@ -43,6 +43,9 @@ PauseMapCursorHandle:
 	JMP $9181
   LDY #$00
 	
+.ORG $050A
+WarpInjectEntryPoint:
+	
 	
 .ORG $0519
 PauseEntryHandle1_b0:
@@ -225,6 +228,9 @@ FrameTimerReset:
   STA frameTimer_hi
   STA frameTimer_lo
   RTS	
+	
+.ORG $1FF0
+	JMP WarpInjectEntryPoint
 
 .BANK $02 SLOT "$A000"
 
@@ -1720,9 +1726,9 @@ PracticeMenuAnyChange:
 	AND #BTN_Right_A
 	BEQ +++
 	++
-	;JMP PauseExitHandle
-	;LDA #$20
-	;STA square1SoundQueue
+	LDA #$00
+	STA PPUMaskVar
+	JMP WarpSegmentPracticeInject
 	+++
 	RTS
 	
@@ -1942,6 +1948,10 @@ PracticeMenuSelectChange:
   LDX #$00
   RTS
 	
+.ORG $1FEB
+WarpSegmentPracticeInject:
+	LDA #$80
+	STA BANK_PRG_8000_5114
 	
 .BANK $1F SLOT "$E000"
 
