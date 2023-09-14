@@ -170,6 +170,10 @@ BtnStartPressed:
 	NOP
 	NOP
 	NOP
+	
+.ORG $1913
+	JSR PracticeMenuMemoryVerify
+	NOP
 
 
 .ORG $192E
@@ -224,11 +228,45 @@ PauseExitHandle:
 	STA practiceMenuScreenDrawn
 	LDA $7C07
 	RTS
+
+	
+PracticeMenuMemoryVerify:
+	LDX #$02
+	--
+		LDA practiceMenuMem_Z, x
+		CMP $9FFD, x ; PracticeMenuMemStr ...fuck you WLA
+		BEQ +
+			LDX #$00 ; If memory fails verification, clear it
+			TXA 
+			-	
+				STA $6F00, x
+				DEX
+			BNE -
+			LDX #$02 ; Write verification string "ZnD"
+			-
+				LDA $9FFD, x  ; PracticeMenuMemStr ...fuck you WLA
+				STA practiceMenuMem_Z, x
+				DEX
+			BPL -
+		+		
+		DEX
+	BPL --
+	LDX #$07
+	LDA #$00
+	RTS
+	
 	
 .ORG $1FF0
 	JMP WarpInjectEntryPoint
 
+
+.ORG $1FFD
+PracticeMenuMemStr:
+	.DB "ZnD"
+	
+	
 .BANK $02 SLOT "$A000"
+
 
 .ORG $1300
 

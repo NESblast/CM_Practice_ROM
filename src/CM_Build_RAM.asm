@@ -87,12 +87,13 @@ PPUIOStep = $1C08 ;Coefficient, usually downcounting
 practiceMenuScreenSet = $6EFE
 practiceMenuScreenDrawn = $6EFF
 
+practiceFlags = $6F7D
 practiceMenuScreenAt = $6F7E
 practiceMenuCursorPos = $6F7F
 
-practiceFlags = $6FFD
-practiceMenuChecksum_hi = $6FFE
-practiceMenuChecksum_lo = $6FFF
+practiceMenuMem_Z = $6FFD ; Memory Check
+practiceMenuMem_n = $6FFE ; Memory Check
+practiceMenuMem_D = $6FFF ; Memory Check
 
 attributeMap = $7600 ;Attribute (palette) map
 areaParserBuffer_Offset = $7700
