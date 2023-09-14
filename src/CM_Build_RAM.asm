@@ -84,11 +84,15 @@ PPUIOStep = $1C08 ;Coefficient, usually downcounting
 ; Cartridge Ram Vars
 .BANK 0 SLOT "RAM_CART"
 
-practiceMenuScreenSet = $6F7E
-practiceMenuScreenAt = $6F7F
+practiceMenuScreenSet = $6EFE
+practiceMenuScreenDrawn = $6EFF
 
-practiceMenuCursorPos = $6FFE
-practiceFlags = $6FFF
+practiceMenuScreenAt = $6F7E
+practiceMenuCursorPos = $6F7F
+
+practiceFlags = $6FFD
+practiceMenuChecksum_hi = $6FFE
+practiceMenuChecksum_lo = $6FFF
 
 attributeMap = $7600 ;Attribute (palette) map
 areaParserBuffer_Offset = $7700

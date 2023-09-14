@@ -34,8 +34,8 @@ PauseEntryInject:
 
 
 .ORG $0357
-PauseExitHandle:	
-	JSR $918C
+PauseExitInject:	
+	JSR PauseExitHandle
 
 
 .ORG $04A6
@@ -119,17 +119,6 @@ _insert_b00_03:
 		JMP $84A9
 	+
 	RTS
-	NOP ; might need these... dont ask
-	NOP ; might need these... dont ask
-	LDA #$00
-	STA isOnMapMenu
-	LDA $7C07
-	RTS
-	LDX #$01
-	STX practiceFlags
-	LDX minimapOffset
-	RTS
-	
 
 .ORG $11CA
 _insert_b00_04:
@@ -228,6 +217,13 @@ FrameTimerReset:
   STA frameTimer_hi
   STA frameTimer_lo
   RTS	
+	
+PauseExitHandle:
+	LDA #$00
+	STA isOnMapMenu
+	STA practiceMenuScreenDrawn
+	LDA $7C07
+	RTS
 	
 .ORG $1FF0
 	JMP WarpInjectEntryPoint
@@ -979,10 +975,14 @@ SpawnTriggerDisplaySet_B1D:
 
 
 .ORG $0B49
+MapRoutineInsert:
 	+
   JMP MapRoutine
 	NOP
 	NOP
+MapRoutineReturn:
+.ORG $0B51
+MapUpdateReturn:
 
 
 .ORG $0E90
@@ -1023,9 +1023,7 @@ MapRoutine:
   BEQ +
 		JSR PracticeMenuRoutine
 		JSR PracticeMenuSettingsHandle
-		LDA #$00
 	+
-	
   LDA input
 	EOR inputDelayed
 	AND input
@@ -1039,7 +1037,7 @@ MapRoutine:
   JMP MapTilesUpdateXY
   LDA #$00
 	+++
-  JMP $8B4E
+  JMP MapRoutineReturn
 
 MapTilesUpdateXY:
   LDA #$B0
@@ -1064,15 +1062,15 @@ MapTilesUpdateXY:
   LDA mapCursorY
   ADC #$02
   STA PpuData_2007
-  JMP $8B51
+  JMP MapUpdateReturn
 	
-	; Free
-.DB $00,$00,$00,$00, $00,$00,$00,$00
-.DB $00,$00,$00,$00, $00,$00,$00,$00
-.DB $00,$00,$00,$00, $00,$00,$00,$00
-.DB $00
  
 PracticeMenuSettingsHandle:
+	;LDA practiceMenuScreenAt
+	;AND #%11111110
+	;BEQ +
+		;RTS
+	;+
   LDY practiceMenuCursorPos
 
   LDA PracticeMenuSettings_lo,Y
@@ -1147,13 +1145,19 @@ PracticeMenuToggle:
   LDA #SFX_EnemySmack
   STA square1SoundQueue
   LDA isOnMapMenu
-  BEQ +
-		LDA #$01
-		STA practiceMenuScreenSet
-		JSR PracticeMenuLineClear
-	+
+  BEQ +++
+		LDA practiceMenuScreenAt
+		BNE +
+			LDA #$01
+			BNE ++
+		+
+		CMP practiceMenuScreenDrawn
+		BEQ +++
+			++
+			STA practiceMenuScreenSet
+			JSR PracticeMenuScreenClear
+	+++
 	RTS
-	;JMP $8B51
 	
 
 ;.ORG $13B0
@@ -1279,24 +1283,59 @@ MapTilesChange:
   STA $7B00,Y
   RTS
 
-;.ORG $15C0
+PracticeMenuStatic_lo:
+.DB >PracticeMenuStaticDraw1
+
+PracticeMenuStatic_hi:
+.DB <PracticeMenuStaticDraw1
+
+
+PracticeMenuParams_lo:
+.DB >PracticeMenuParamsDraw1
+
+PracticeMenuParams_hi:
+.DB <PracticeMenuParamsDraw1
+
+
 PracticeMenuRoutine:
+
+
+	; Need a gaddamn checksum data gets fucked
+	
 
 	; Draw stuff if necessary
 	LDY practiceMenuScreenSet
 	BEQ ++
 	BMI +
 		STY practiceMenuScreenAt
-		JSR PracticeMenuLineDraw
+		TYA 
+		EOR #$FF
+		STA practiceMenuScreenSet
+		
+		LDA PracticeMenuStatic_lo-1, y
+		STA addr03_temp+1
+		LDA PracticeMenuStatic_hi-1, y
+		STA addr03_temp
+	
+		JMP PracticeMenuStaticDraw1
+		
+		JMP (addr03_temp)
+	+
 		LDA #$FF
 		EOR practiceMenuScreenSet
-		STA practiceMenuScreenSet
-		RTS
-	+
-		JSR PracticeMenuDrawParams
+		STA practiceMenuScreenDrawn
+		TAY
 		LDA #$00
 		STA practiceMenuScreenSet
-		RTS
+		
+		LDA PracticeMenuParams_lo-1, y
+		STA addr03_temp+1
+		LDA PracticeMenuParams_hi-1, y
+		STA addr03_temp
+		
+		JMP PracticeMenuParamsDraw1
+		
+		JMP (addr03_temp)
 	++
 	
   LDA input
@@ -1366,15 +1405,10 @@ PracticeMenuTexts:
 .DB $00
 .DB "Practice"
 
-PracticeMenuLineDraw_hi:
-.DB $22
-
-PracticeMenuLineDraw_lo:
-.DB $40
 
 
-.ORG $1640
-PracticeMenuLineClear:
+;.ORG $1640
+PracticeMenuScreenClear:
 	LDA #$22
   STA PpuAddr_2006
 	LDA #$40
@@ -1397,7 +1431,7 @@ PracticeMenuLineClear:
 	
 	RTS
 	
-PracticeMenuLineDraw:
+PracticeMenuStaticDraw1:
 	
 	; i hardcoded these instead, for speed, should be enough room for a few of them, can redo temp address if need be. -CH
   ;LDA #<PracticeMenuTexts
@@ -1685,6 +1719,7 @@ PracticeMenuDeathText:
 .DB "Fast"
 .DB $00,$00,$00,$00
 
+
 PracticeMenuDeathDraw:
   LDA #$22
   STA PpuAddr_2006
@@ -1706,7 +1741,7 @@ PracticeMenuDeathDraw:
   RTS
 	
 	
-PracticeMenuDrawParams:
+PracticeMenuParamsDraw1:
   JSR PracticeMenuWorldDraw
   JSR PracticeMenuDashesDraw
   JSR PracticeMenuMoonsDraw
@@ -1715,6 +1750,7 @@ PracticeMenuDrawParams:
   JSR PracticeMenuDeathDraw
   JSR PracticeMenuAbilityDraw
   JMP $8B51
+
 
 PracticeMenuAnyChange:
 	TYA ;input
@@ -1727,10 +1763,13 @@ PracticeMenuAnyChange:
 	BEQ +++
 	++
 	LDA #$00
-	STA PPUMaskVar
-	JMP WarpSegmentPracticeInject
+	STA practiceMenuScreenSet
+	;LDA #$00
+	;STA PPUMaskVar
+	;JMP WarpSegmentPracticeInject
 	+++
 	RTS
+	
 	
 PracticeMenu100Change:
 	TYA ;input
@@ -1746,6 +1785,7 @@ PracticeMenu100Change:
 	STA square1SoundQueue
 	+++
 	RTS	
+	
 	
 PracticeMenuAbilitiesChange:
   LDA marioAbilityWallJump
@@ -1948,10 +1988,12 @@ PracticeMenuSelectChange:
   LDX #$00
   RTS
 	
+	
 .ORG $1FEB
 WarpSegmentPracticeInject:
 	LDA #$80
 	STA BANK_PRG_8000_5114
+	
 	
 .BANK $1F SLOT "$E000"
 
