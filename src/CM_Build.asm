@@ -249,7 +249,7 @@ PracticeMenuMemoryVerify:
 				DEX
 			BPL -
 		+		
-		DEX
+		DEX ; Please drink a Verification Can to continue
 	BPL --
 	LDX #$07
 	LDA #$00
@@ -1323,23 +1323,23 @@ MapTilesChange:
 
 PracticeMenuStatic_lo:
 .DB >PracticeMenuStaticDraw1
+.DB >PracticeMenuStaticDraw2
 
 PracticeMenuStatic_hi:
 .DB <PracticeMenuStaticDraw1
+.DB <PracticeMenuStaticDraw2
 
 
 PracticeMenuParams_lo:
 .DB >PracticeMenuParamsDraw1
+.DB >PracticeMenuParamsDraw2
 
 PracticeMenuParams_hi:
 .DB <PracticeMenuParamsDraw1
+.DB <PracticeMenuParamsDraw2
 
 
 PracticeMenuRoutine:
-
-
-	; Need a gaddamn checksum data gets fucked
-	
 
 	; Draw stuff if necessary
 	LDY practiceMenuScreenSet
@@ -1354,8 +1354,6 @@ PracticeMenuRoutine:
 		STA addr03_temp+1
 		LDA PracticeMenuStatic_hi-1, y
 		STA addr03_temp
-	
-		JMP PracticeMenuStaticDraw1
 		
 		JMP (addr03_temp)
 	+
@@ -1370,8 +1368,6 @@ PracticeMenuRoutine:
 		STA addr03_temp+1
 		LDA PracticeMenuParams_hi-1, y
 		STA addr03_temp
-		
-		JMP PracticeMenuParamsDraw1
 		
 		JMP (addr03_temp)
 	++
@@ -1424,27 +1420,6 @@ PracticeMenuCursorPosY:
 .DB $7B
 
 
-PracticeMenuTexts:
-.DB "World"
-.DB "Dashes"
-.DB "Moons"
-.DB "Messages"
-.DB "Select"
-.DB "Death"
-.DB "Powerups"
-.DB "Any%"
-.DB $00,$00
-.DB "Segment"
-.DB $00
-.DB "Practice"
-.DB "100%"
-.DB $00,$00
-.DB "Segment"
-.DB $00
-.DB "Practice"
-
-
-
 ;.ORG $1640
 PracticeMenuScreenClear:
 	LDA #$22
@@ -1469,13 +1444,28 @@ PracticeMenuScreenClear:
 	
 	RTS
 	
+	
+PracticeMenuTexts:
+.DB "World"
+.DB "Dashes"
+.DB "Moons"
+.DB "Messages"
+.DB "Select"
+.DB "Death"
+.DB "Powerups"
+.DB "Any%"
+.DB $00,$00
+.DB "Segment"
+.DB $00
+.DB "Practice"
+.DB "100%"
+.DB $00,$00
+.DB "Segment"
+.DB $00
+.DB "Practice"
+	
 PracticeMenuStaticDraw1:
 	
-	; i hardcoded these instead, for speed, should be enough room for a few of them, can redo temp address if need be. -CH
-  ;LDA #<PracticeMenuTexts
-  ;STA addr0A_temp
-  ;LDA #>PracticeMenuTexts
-  ;STA addr0A_temp+1
   LDA #$22
   STA PpuAddr_2006
   LDA #$46
@@ -1483,12 +1473,12 @@ PracticeMenuStaticDraw1:
   LDX #$05 ; World
 	LDY #$00
 	-
-	; LDA (addr0A_temp), y
   LDA PracticeMenuTexts, y
   STA PpuData_2007
   INY
   DEX
   BNE -
+	
   LDA #$22
   STA PpuAddr_2006
   LDA #$65
@@ -1503,6 +1493,7 @@ PracticeMenuStaticDraw1:
   INY
   DEX
   BNE -
+	
   LDA #$22
   STA PpuAddr_2006
   LDA #$86
@@ -1514,6 +1505,7 @@ PracticeMenuStaticDraw1:
   INY
   DEX
   BNE -
+	
   LDA #$22
   STA PpuAddr_2006
   LDA #$A3
@@ -1528,6 +1520,7 @@ PracticeMenuStaticDraw1:
   INY
   DEX
   BNE -
+	
   LDA #$22
   STA PpuAddr_2006
   LDA #$C5
@@ -1542,6 +1535,7 @@ PracticeMenuStaticDraw1:
   INY
   DEX
   BNE -
+	
   LDA #$22
   STA PpuAddr_2006
   LDA #$E6
@@ -1553,6 +1547,7 @@ PracticeMenuStaticDraw1:
   INY
   DEX
   BNE -
+	
   LDA #$22
   STA PpuAddr_2006
   LDA #$57
@@ -1597,8 +1592,52 @@ PracticeMenuStaticDraw1:
   INY
   DEX
   BNE -
+	
   RTS
 
+
+PracticeMenuTexts2:
+.DB "FUCKIN TEST SHIT"
+
+PracticeMenuStaticDraw2:
+	LDA #$22
+  STA PpuAddr_2006
+  LDA #$44
+  STA PpuAddr_2006
+	LDY #$00
+  LDX #$08 ; Fuckin Test Shit
+	-
+  LDA PracticeMenuTexts2, y
+  STA PpuData_2007
+  INY
+	LDA PracticeMenuTexts2, y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+	RTS
+
+PracticeMenuParams2
+.DB "THIS FUCKIN GOOD"
+
+PracticeMenuParamsDraw2:
+	LDA #$22
+  STA PpuAddr_2006
+  LDA #$84
+  STA PpuAddr_2006
+	LDY #$00
+  LDX #$08 ; Fuckin Test Shit
+	-
+  LDA PracticeMenuParams2, y
+  STA PpuData_2007
+  INY
+	LDA PracticeMenuParams2, y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+	RTS
+	
 
 PracticeMenuMaxDashesChange:
   LDX maxDashesCount
@@ -1800,8 +1839,16 @@ PracticeMenuAnyChange:
 	AND #BTN_Right_A
 	BEQ +++
 	++
-	LDA #$00
-	STA practiceMenuScreenSet
+	; TEST stuff
+	LDX #$01
+	LDA practiceMenuScreenAt
+	CMP #$02
+	BEQ +
+		LDX #$02
+	+
+	STX practiceMenuScreenSet
+	JSR PracticeMenuScreenClear
+	
 	;LDA #$00
 	;STA PPUMaskVar
 	;JMP WarpSegmentPracticeInject
