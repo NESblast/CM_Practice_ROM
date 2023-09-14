@@ -1102,7 +1102,7 @@ _dataOrSomething1_maybe:
 .DB $AD,$F7,$07,$D0, $08,$A9,$AA,$8D
 .DB $05,$51,$4C,$52, $8E,$A9,$00,$8D
 	
-
+.ORG $1314
 PracticeMenuMapWorldChange:
   LDX worldNumber_temp
   AND #BTN_Right_A
@@ -1156,7 +1156,7 @@ PracticeMenuToggle:
 	;JMP $8B51
 	
 
-.ORG $13A0
+;.ORG $13B0
 PracticeMenuSettings_lo:
 .DB >PracticeMenuMapWorldChange
 .DB >PracticeMenuMaxDashesChange
@@ -1172,7 +1172,7 @@ PracticeMenuSettings_lo:
 ;	.DB $00,$00,$00,$00, $00,$00,$00,$00
 ;	.DB $00,$00,$A0,$00, $8C,$43,$07,$60
 	
-.ORG $13D0
+;.ORG $13D0
 PracticeMenuSettings_hi:
 .DB <PracticeMenuMapWorldChange
 .DB <PracticeMenuMaxDashesChange
