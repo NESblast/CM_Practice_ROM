@@ -84,6 +84,7 @@ PPUIOStep = $1C08 ;Coefficient, usually downcounting
 ; Cartridge Ram Vars
 .BANK 0 SLOT "RAM_CART"
 
+practiceMenuLineDrawn = $6EFD
 practiceMenuScreenSet = $6EFE
 practiceMenuScreenDrawn = $6EFF
 

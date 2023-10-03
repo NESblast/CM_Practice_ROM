@@ -234,7 +234,7 @@ PracticeMenuMemoryVerify:
 	LDX #$02
 	--
 		LDA practiceMenuMem_Z, x
-		CMP $9FFD, x ; PracticeMenuMemStr ...fuck you WLA
+		CMP PracticeMenuMemStr.w, x 
 		BEQ +
 			LDX #$00 ; If memory fails verification, clear it
 			TXA 
@@ -244,7 +244,7 @@ PracticeMenuMemoryVerify:
 			BNE -
 			LDX #$02 ; Write verification string "ZnD"
 			-
-				LDA $9FFD, x  ; PracticeMenuMemStr ...fuck you WLA
+				LDA PracticeMenuMemStr.w, x  
 				STA practiceMenuMem_Z, x
 				DEX
 			BPL -
@@ -767,7 +767,8 @@ MapDraw_Insert0_CH:
 	
 .ORG $0ECE
 MapDraw_ClearBottomScreen:
-	CPY #$80
+	;CPY #$80
+	CPY #$E0
 	
 	
 .ORG $0EE3
@@ -986,7 +987,7 @@ _insert_b0e_01:
 
 
 .ORG $020B
-.DB "PRACTICE ROM v1.2"
+.DB "PRACTICE ROM v1.3"
 .DB $00,$00,$00,$00, $00,$00,$00,$00
 .DB $00,$00
 
@@ -1037,7 +1038,7 @@ ScanlineInterruptHandle_maybe:
 		STY $5128
 		INY
 		STY $5129
-		LDA #$D8
+		LDA #$DF
 		STA $5203 ; scanline for next IRQ
 		INC $0590
 		RTS
@@ -1323,19 +1324,21 @@ MapTilesChange:
 
 PracticeMenuStatic_lo:
 .DB >PracticeMenuStaticDraw1
-.DB >PracticeMenuStaticDraw2
+.DB >PracticeMenuSegmentStaticDraw
 
 PracticeMenuStatic_hi:
 .DB <PracticeMenuStaticDraw1
-.DB <PracticeMenuStaticDraw2
+.DB <PracticeMenuSegmentStaticDraw
 
 
 PracticeMenuParams_lo:
 .DB >PracticeMenuParamsDraw1
 .DB >PracticeMenuParamsDraw2
+.DB >PracticeMenuParamsDraw2
 
 PracticeMenuParams_hi:
 .DB <PracticeMenuParamsDraw1
+.DB <PracticeMenuParamsDraw2
 .DB <PracticeMenuParamsDraw2
 
 
@@ -1343,10 +1346,18 @@ PracticeMenuRoutine:
 
 	; Draw stuff if necessary
 	LDY practiceMenuScreenSet
-	BEQ ++
-	BMI +
+	BEQ +++
+	; Hide cursor
+	LDA #$FF
+	STA mapCursorPosY
+	TYA
+	BMI ++
 		STY practiceMenuScreenAt
-		TYA 
+		ASL
+		ASL
+		ASL
+		STA practiceMenuLineDrawn
+		TYA
 		EOR #$FF
 		STA practiceMenuScreenSet
 		
@@ -1356,13 +1367,10 @@ PracticeMenuRoutine:
 		STA addr03_temp
 		
 		JMP (addr03_temp)
-	+
+	++
 		LDA #$FF
 		EOR practiceMenuScreenSet
-		STA practiceMenuScreenDrawn
 		TAY
-		LDA #$00
-		STA practiceMenuScreenSet
 		
 		LDA PracticeMenuParams_lo-1, y
 		STA addr03_temp+1
@@ -1370,7 +1378,7 @@ PracticeMenuRoutine:
 		STA addr03_temp
 		
 		JMP (addr03_temp)
-	++
+	+++
 	
   LDA input
 	EOR inputDelayed
@@ -1403,7 +1411,14 @@ PracticeMenuRoutine:
 		+
 		STX practiceMenuCursorPos
   ++
-  LDY practiceMenuCursorPos
+	LDA practiceMenuScreenAt
+	LSR
+	BEQ +
+		LDA #$10
+	+
+  ORA practiceMenuCursorPos
+	TAY
+	
 	LDA PracticeMenuCursorPosX, y
   STA mapCursorPosX
 	LDA PracticeMenuCursorPosY, y
@@ -1412,12 +1427,16 @@ PracticeMenuRoutine:
 	RTS
 	
 PracticeMenuCursorPosX:
-.DB $58,$58,$58,$58, $58,$58,$58,$58
-.DB $B0
+.DB $60,$60,$60,$60, $60,$60,$60,$60
+.DB $B0,$00,$00,$00, $00,$00,$00,$00
+.DB $30,$30,$30,$30, $30,$30,$30,$30
+.DB $78
 
 PracticeMenuCursorPosY:
 .DB $7B,$83,$8B,$93, $9B,$A3,$B3,$BB
-.DB $7B
+.DB $7B,$00,$00,$00, $00,$00,$00,$00
+.DB $8B,$93,$9B,$A3, $AB,$B3,$BB,$C3
+.DB $D3
 
 
 ;.ORG $1640
@@ -1439,9 +1458,12 @@ PracticeMenuScreenClear:
 		STA PpuData_2007
 		STA PpuData_2007
 		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
 		DEX
 	BNE -
 	
+	STA PPUMaskVar
 	RTS
 	
 	
@@ -1465,7 +1487,6 @@ PracticeMenuTexts:
 .DB "Practice"
 	
 PracticeMenuStaticDraw1:
-	
   LDA #$22
   STA PpuAddr_2006
   LDA #$46
@@ -1473,10 +1494,10 @@ PracticeMenuStaticDraw1:
   LDX #$05 ; World
 	LDY #$00
 	-
-  LDA PracticeMenuTexts, y
-  STA PpuData_2007
-  INY
-  DEX
+		LDA PracticeMenuTexts, y
+		STA PpuData_2007
+		INY
+		DEX
   BNE -
 	
   LDA #$22
@@ -1485,13 +1506,13 @@ PracticeMenuStaticDraw1:
   STA PpuAddr_2006
   LDX #$03 ; Dashes
 	-
-  LDA PracticeMenuTexts, y
-  STA PpuData_2007
-  INY
-	LDA PracticeMenuTexts, y
-  STA PpuData_2007
-  INY
-  DEX
+		LDA PracticeMenuTexts, y
+		STA PpuData_2007
+		INY
+		LDA PracticeMenuTexts, y
+		STA PpuData_2007
+		INY
+		DEX
   BNE -
 	
   LDA #$22
@@ -1500,10 +1521,10 @@ PracticeMenuStaticDraw1:
   STA PpuAddr_2006
   LDX #$05 ; Moons
 	-
-  LDA PracticeMenuTexts, y
-  STA PpuData_2007
-  INY
-  DEX
+		LDA PracticeMenuTexts, y
+		STA PpuData_2007
+		INY
+		DEX
   BNE -
 	
   LDA #$22
@@ -1512,13 +1533,13 @@ PracticeMenuStaticDraw1:
   STA PpuAddr_2006
   LDX #$04 ; Messages
 	-
-  LDA PracticeMenuTexts, y
-  STA PpuData_2007
-  INY
-	LDA PracticeMenuTexts, y
-  STA PpuData_2007
-  INY
-  DEX
+		LDA PracticeMenuTexts, y
+		STA PpuData_2007
+		INY
+		LDA PracticeMenuTexts, y
+		STA PpuData_2007
+		INY
+		DEX
   BNE -
 	
   LDA #$22
@@ -1527,13 +1548,13 @@ PracticeMenuStaticDraw1:
   STA PpuAddr_2006
   LDX #$03 ; Select
 	-
-  LDA PracticeMenuTexts, y
-  STA PpuData_2007
-  INY
-	LDA PracticeMenuTexts, y
-  STA PpuData_2007
-  INY
-  DEX
+		LDA PracticeMenuTexts, y
+		STA PpuData_2007
+		INY
+		LDA PracticeMenuTexts, y
+		STA PpuData_2007
+		INY
+		DEX
   BNE -
 	
   LDA #$22
@@ -1542,10 +1563,10 @@ PracticeMenuStaticDraw1:
   STA PpuAddr_2006
   LDX #$05 ; Death
 	-
-  LDA PracticeMenuTexts, y
-  STA PpuData_2007
-  INY
-  DEX
+		LDA PracticeMenuTexts, y
+		STA PpuData_2007
+		INY
+		DEX
   BNE -
 	
   LDA #$22
@@ -1554,13 +1575,13 @@ PracticeMenuStaticDraw1:
   STA PpuAddr_2006
   LDX #$04 ; Powerups
 	-
-	LDA PracticeMenuTexts, y
-  STA PpuData_2007
-  INY
-  LDA PracticeMenuTexts, y
-  STA PpuData_2007
-  INY
-  DEX
+		LDA PracticeMenuTexts, y
+		STA PpuData_2007
+		INY
+		LDA PracticeMenuTexts, y
+		STA PpuData_2007
+		INY
+		DEX
   BNE -
 	
 	LDA #$23
@@ -1569,13 +1590,13 @@ PracticeMenuStaticDraw1:
   STA PpuAddr_2006
   LDX #$0B ; Any%  Segment Practice
 	-
-  LDA PracticeMenuTexts, y
-  STA PpuData_2007
-  INY
-	LDA PracticeMenuTexts, y
-  STA PpuData_2007
-  INY
-  DEX
+		LDA PracticeMenuTexts, y
+		STA PpuData_2007
+		INY
+		LDA PracticeMenuTexts, y
+		STA PpuData_2007
+		INY
+		DEX
   BNE -
 	
 	LDA #$23
@@ -1596,42 +1617,137 @@ PracticeMenuStaticDraw1:
   RTS
 
 
-PracticeMenuTexts2:
-.DB "FUCKIN TEST SHIT"
+PracticeMenuSegmentStaticText:
+.DB "Any%"
+.DB $00
+.DB "Seg."
+.DB $00,$00,$00,$00, $00,$00
+.DB "Time"
+.DB $00
+.DB "Goal"
+.DB $00
+.DB "Rank"
+.DB $00
 
-PracticeMenuStaticDraw2:
+.DB "<- Prev   "
+.DB "Next -> "
+
+PracticeMenuSegmentStaticDraw:
 	LDA #$22
   STA PpuAddr_2006
-  LDA #$44
+  LDA #$42
   STA PpuAddr_2006
 	LDY #$00
-  LDX #$08 ; Fuckin Test Shit
+  LDX #$0F ; Any% Seg.    Time Goal Rank
 	-
-  LDA PracticeMenuTexts2, y
+  LDA PracticeMenuSegmentStaticText, y
   STA PpuData_2007
   INY
-	LDA PracticeMenuTexts2, y
+	LDA PracticeMenuSegmentStaticText, y
   STA PpuData_2007
   INY
   DEX
   BNE -
-	RTS
-
-PracticeMenuParams2
-.DB "THIS FUCKIN GOOD"
-
-PracticeMenuParamsDraw2:
-	LDA #$22
+	
+	LDA #$23
   STA PpuAddr_2006
-  LDA #$84
+  LDA #$A7
   STA PpuAddr_2006
-	LDY #$00
-  LDX #$08 ; Fuckin Test Shit
+  LDX #$09 ; Fuckin Test Shit
 	-
-  LDA PracticeMenuParams2, y
+  LDA PracticeMenuSegmentStaticText, y
   STA PpuData_2007
   INY
-	LDA PracticeMenuParams2, y
+	LDA PracticeMenuSegmentStaticText, y
+  STA PpuData_2007
+  INY
+  DEX
+  BNE -
+	
+	RTS
+	
+PraciceMenuSegmentListText:
+.DB "0Intro"
+PMST_1:
+.DB "0Item Cave"
+PMST_2:
+.DB "0Tunnel"
+PMST_3:
+.DB "1Start"
+PMST_4:
+.DB "1Kando"
+PMST_5:
+.DB "1Segment X"
+PMST_6:
+.DB "1Segment X"
+PMST_7:
+.DB "1Segment X"
+PMST_8:
+.DB $00 ; meh
+
+PracticeMenuSegmentLoc_hi:
+.DB $22,$22,$22,$22, $23,$23,$23,$23
+
+PracticeMenuSegmentLoc_lo:
+.DB $82,$A2,$C2,$E2, $02,$22,$42,$62
+
+
+PracticeMenuSegmentY:
+.DB $00
+.DB PMST_1 - PraciceMenuSegmentListText
+.DB PMST_2 - PraciceMenuSegmentListText
+.DB PMST_3 - PraciceMenuSegmentListText
+.DB PMST_4 - PraciceMenuSegmentListText
+.DB PMST_5 - PraciceMenuSegmentListText
+.DB PMST_6 - PraciceMenuSegmentListText
+.DB PMST_7 - PraciceMenuSegmentListText
+.DB PMST_8 - PraciceMenuSegmentListText
+
+
+PracticeMenuParamsDraw2:
+
+	LDY practiceMenuLineDrawn
+	INC practiceMenuLineDrawn
+	LDA #$07
+	AND practiceMenuLineDrawn
+	BNE +
+		TYA 
+		STA practiceMenuScreenDrawn
+		LDA #$00
+		STA practiceMenuScreenSet
+	+
+	
+	LDA PracticeMenuSegmentLoc_hi-$10, y
+  STA PpuAddr_2006
+  LDA PracticeMenuSegmentLoc_lo-$10, y
+  STA PpuAddr_2006
+	
+	; Length
+	INY 
+	LDA PracticeMenuSegmentY-$10, y
+	DEY
+	SEC
+	SBC PracticeMenuSegmentY-$10, y
+	TAX
+	
+	; Start
+	LDA PracticeMenuSegmentY-$10, y
+	TAY
+	
+	; Print world
+	LDA #$57
+	STA PpuData_2007
+	LDA PraciceMenuSegmentListText, y
+	STA PpuData_2007
+	INY
+	DEX
+	LDA #$00
+	STA PpuData_2007
+	STA PpuData_2007
+	STA PpuData_2007
+	
+	-
+  LDA PraciceMenuSegmentListText, y
   STA PpuData_2007
   INY
   DEX
@@ -1819,6 +1935,11 @@ PracticeMenuDeathDraw:
 	
 	
 PracticeMenuParamsDraw1:
+	TYA 
+	STA practiceMenuScreenDrawn
+	LDA #$00
+	STA practiceMenuScreenSet
+		
   JSR PracticeMenuWorldDraw
   JSR PracticeMenuDashesDraw
   JSR PracticeMenuMoonsDraw
