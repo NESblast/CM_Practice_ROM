@@ -767,8 +767,7 @@ MapDraw_Insert0_CH:
 	
 .ORG $0ECE
 MapDraw_ClearBottomScreen:
-	;CPY #$80
-	CPY #$E0
+	CPY #$80
 	
 	
 .ORG $0EE3
@@ -902,32 +901,34 @@ MapDraw_maybe:
   LDX #$9F
   STX PpuData_2007
   STA PpuData_2007
-	LDA #$22
-  STA PpuAddr_2006
-  LDA #$6A
-  STA PpuAddr_2006
-	LDX #$0C
 	LDA isOnMapMenu
-	BNE ++
-	LDY #$00
-	-
-		LDA PracticeMenuTeaserText, y
-		STA PpuData_2007
-		INY
-		DEX
-	BNE -
-	
-	LDA #$22
-  STA PpuAddr_2006
-  LDA #$AC
-  STA PpuAddr_2006
-	LDX #$08
-	-
-		LDA PracticeMenuTeaserText, y
-		STA PpuData_2007
-		INY
-		DEX
-	BNE -
+	BNE ++	
+		LDA #$22
+		STA PpuAddr_2006
+		LDA #$6A
+		STA PpuAddr_2006
+		LDX #$0C
+		LDY #$00
+		-
+			LDA PracticeMenuTeaserText, y
+			STA PpuData_2007
+			INY
+			DEX
+		BNE -
+		
+		LDA #$22
+		STA PpuAddr_2006
+		LDA #$AC
+		STA PpuAddr_2006
+		LDX #$08
+		-
+			LDA PracticeMenuTeaserText, y
+			STA PpuData_2007
+			INY
+			DEX
+		BNE -
+		; Clear the rest of bottom screen
+		JSR PracticeMenuFinishBottomScreenClear
 	++
   INC mapDrawFlags
   RTS
@@ -954,6 +955,24 @@ MapDraw_Insert7_CH:
 PracticeMenuTeaserText:
 .DB "Press Select"
 .DB "For Menu"
+
+PracticeMenuFinishBottomScreenClear:
+	LDA #$23
+	STA PpuAddr_2006
+	LDA #$60
+	STA PpuAddr_2006
+	LDA #$00
+	LDX #$10
+	-
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
+		STA PpuData_2007
+		DEX
+	BNE -
+	RTS
 
 
 .BANK $0E SLOT "$A000"
@@ -1105,23 +1124,28 @@ MapTilesUpdateXY:
 	
  
 PracticeMenuSettingsHandle:
-	;LDA practiceMenuScreenAt
-	;AND #%11111110
-	;BEQ +
-		;RTS
-	;+
-  LDY practiceMenuCursorPos
-
-  LDA PracticeMenuSettings_lo,Y
-  STA addr03_temp+1
-  LDA PracticeMenuSettings_hi,Y
-  STA addr03_temp
 	
 	LDA input
 	EOR inputDelayed
 	AND input
 	TAY
+	
+	; Handle segment select
+	LDA practiceMenuScreenAt
+	LSR
+	BEQ +
+		JMP PracticeMenuSegmentHandle
+	+
+	
+  LDX practiceMenuCursorPos
+	STX $6E80
 
+  LDA PracticeMenuSettings_lo.w, x
+  STA addr03_temp+1
+  LDA PracticeMenuSettings_hi.w, x
+  STA addr03_temp
+	
+	TYA
   JMP (addr03_temp)	
 	
 	
@@ -1711,7 +1735,7 @@ PracticeMenuParamsDraw2:
 	LDA #$07
 	AND practiceMenuLineDrawn
 	BNE +
-		TYA 
+		LDA practiceMenuScreenAt
 		STA practiceMenuScreenDrawn
 		LDA #$00
 		STA practiceMenuScreenSet
@@ -1956,9 +1980,9 @@ PracticeMenuAnyChange:
   BEQ +
 		BNE ++
 	+
-	TYA;input
-	AND #BTN_Right_A
-	BEQ +++
+		TYA;input
+		AND #BTN_Right_A
+		BEQ +++
 	++
 	; TEST stuff
 	LDX #$01
@@ -1968,11 +1992,10 @@ PracticeMenuAnyChange:
 		LDX #$02
 	+
 	STX practiceMenuScreenSet
-	JSR PracticeMenuScreenClear
 	
-	;LDA #$00
-	;STA PPUMaskVar
-	;JMP WarpSegmentPracticeInject
+	LDA #$08
+	STA practiceMenuCursorPos
+	JMP PracticeMenuScreenClear
 	+++
 	RTS
 	
@@ -2193,6 +2216,46 @@ PracticeMenuSelectChange:
 	+
   LDX #$00
   RTS
+	
+PracticeMenuSegmentHandle:
+	
+	TYA
+	AND #BTN_Right_A
+	BEQ +++
+		LDA practiceMenuCursorPos
+		CMP #$08
+		BNE ++ ; Page select
+			LDX practiceMenuScreenAt
+			INX
+			CPX #PRAC_pageCount
+			BNE +
+				LDX #$01
+			+		
+			STX practiceMenuScreenSet
+			LDA #$06
+			STA practiceMenuCursorPos
+			JMP PracticeMenuScreenClear
+		++
+	+++
+	TYA
+	AND #BTN_Left_B
+	BEQ +++
+		LDA practiceMenuCursorPos
+		CMP #$08
+		BNE ++ ; Page select
+			LDX practiceMenuScreenAt
+			DEX
+			BNE +
+				LDX #PRAC_pageCount
+				DEX
+			+
+			STX practiceMenuScreenSet
+			LDA #$06
+			STA practiceMenuCursorPos
+			JMP PracticeMenuScreenClear
+		++
+	+++
+	RTS
 	
 	
 .ORG $1FEB

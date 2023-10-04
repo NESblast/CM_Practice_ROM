@@ -18,6 +18,7 @@ PRAC_messageShow      = %00100000
 
 PRAC_moonsAndMessages = PRAC_moonCollect + PRAC_messageShow
 
+PRAC_pageCount			 = $03
 
 ;sound effects constants
 ;SQ1
